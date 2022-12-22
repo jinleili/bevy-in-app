@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment version="4864" identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="bevy_in_iOS" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Bevy in iOS App" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SOo-xX-hpl">
+                                <rect key="frame" x="132.5" y="48" width="149" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="FEd-wX-ds2"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                <color key="textColor" red="0.12984204290000001" green="0.12984612579999999" blue="0.12984395030000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7tr-8o-p79">
+                                <rect key="frame" x="0.0" y="100" width="414" height="702"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bHv-L9-Ngy" customClass="MetalView" customModule="bevy_in_iOS" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="414" height="702"/>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstItem="bHv-L9-Ngy" firstAttribute="leading" secondItem="7tr-8o-p79" secondAttribute="leading" id="3fx-5x-V01"/>
+                                    <constraint firstAttribute="trailing" secondItem="bHv-L9-Ngy" secondAttribute="trailing" id="Hrv-7J-hDd"/>
+                                    <constraint firstItem="bHv-L9-Ngy" firstAttribute="top" secondItem="7tr-8o-p79" secondAttribute="top" id="Tlm-rQ-Opt"/>
+                                    <constraint firstAttribute="bottom" secondItem="bHv-L9-Ngy" secondAttribute="bottom" id="iTG-PD-yTw"/>
+                                </constraints>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="clip" translatesAutoresizingMaskIntoConstraints="NO" id="lNf-VF-2kI">
+                                <rect key="frame" x="107" y="810" width="200" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="N7c-yG-lPa"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="200" id="umy-m3-Kfr"/>
+                                </constraints>
+                                <color key="tintColor" systemColor="systemRedColor"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Restart"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Restart">
+                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="30"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="recreateBevyApp" destination="BYZ-38-t0r" eventType="touchUpInside" id="2MA-vd-nct"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemGray5Color"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="7tr-8o-p79" secondAttribute="trailing" id="3Be-td-i6X"/>
+                            <constraint firstItem="7tr-8o-p79" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="7FF-aZ-u2l"/>
+                            <constraint firstItem="SOo-xX-hpl" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Hj4-04-KSg"/>
+                            <constraint firstItem="7tr-8o-p79" firstAttribute="top" secondItem="SOo-xX-hpl" secondAttribute="bottom" constant="8" symbolic="YES" id="KmP-WV-EbZ"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="lNf-VF-2kI" secondAttribute="bottom" constant="8" id="hqt-Pm-tub"/>
+                            <constraint firstItem="SOo-xX-hpl" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="qd8-bG-HUw"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="7tr-8o-p79" secondAttribute="bottom" constant="60" id="rNS-cT-hKc"/>
+                            <constraint firstItem="lNf-VF-2kI" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="sBQ-k2-sux"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="metalV" destination="bHv-L9-Ngy" id="4Ec-li-5S7"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="44.927536231884062" y="93.75"/>
+        </scene>
+    </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGray5Color">
+            <color red="0.89803921568627454" green="0.89803921568627454" blue="0.91764705882352937" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

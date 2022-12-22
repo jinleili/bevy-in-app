@@ -1,0 +1,42 @@
+[package]
+name = "bevy-in-app"
+version = "0.1.0"
+authors = ["jinleili"]
+edition = "2021"
+rust-version = "1.64"
+
+[lib]
+crate-type = ["rlib", "staticlib", "cdylib"]
+
+[dependencies]
+libc = "*"
+raw-window-handle = "0.5"
+
+# app-surface = { path = "../wgpu-on-app/app-surface" }
+wgpu = "0.14"
+bevy = { path = "../bevy", features = [
+    "bevy_audio",
+    "bevy_sprite",
+    "bevy_winit",
+    "bevy_core_pipeline",
+    "bevy_pbr",
+    "bevy_render",
+    "bevy_text",
+    "bevy_ui",
+    "vorbis",
+    "filesystem_watcher"
+], default-features = false }
+bevy_window = { path = "../bevy/crates/bevy_window" }
+bevy_app = { path = "../bevy/crates/bevy_app" }
+bevy_ecs = { path = "../bevy/crates/bevy_ecs" }
+bevy_utils = { path = "../bevy/crates/bevy_utils" }
+
+[target.'cfg(target_os = "ios")'.dependencies]
+core-graphics = "*"
+objc = "*"
+
+[target.'cfg(target_os = "android")'.dependencies]
+android_logger = "0.10.1"
+jni = "0.19"
+jni_fn = "0.1"
+ndk-sys = "*"
