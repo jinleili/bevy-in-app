@@ -5,9 +5,8 @@ use bevy_ecs::{
     event::{Events, ManualEventReader},
     world::World,
 };
-use bevy_utils::HashMap;
 use bevy_window::{
-    CreateWindow, ModifiesWindows, WindowClosed, WindowCreated, WindowId, WindowResized,
+    CreateWindow, ModifiesWindows, WindowClosed, WindowCreated, WindowResized,
     WindowScaleFactorChanged, Windows,
 };
 
@@ -16,10 +15,8 @@ use bevy_window::{
 mod app_view;
 pub use app_view::*;
 
-#[derive(Debug, Default)]
-pub struct AppViews {
-    pub views: HashMap<WindowId, AppView>,
-}
+mod app_views;
+use app_views::AppViews;
 
 #[derive(Default, Resource)]
 struct AppCreateWindowReader(ManualEventReader<CreateWindow>);
@@ -45,6 +42,8 @@ fn change_window(
 
 #[allow(unused)]
 pub fn app_runner(app: &mut App) {
+    println!("app_runner----");
+
     let mut create_window_event_reader = app
         .world
         .remove_resource::<AppCreateWindowReader>()
@@ -59,21 +58,15 @@ pub fn app_runner(app: &mut App) {
     app.insert_resource(crate::AppWindowSize { size });
 }
 
-#[cfg(not(target_os = "ios"))]
-#[allow(unused)]
 fn handle_create_window_events(
     world: &mut World,
     create_window_event_reader: &mut ManualEventReader<CreateWindow>,
 ) {
-}
-
-#[cfg(target_os = "ios")]
-#[allow(unused)]
-fn handle_create_window_events(
-    world: &mut World,
-    create_window_event_reader: &mut ManualEventReader<CreateWindow>,
-) {
+    println!("handle_create_window_events----");
+    #[cfg(target_os = "ios")]
     let view_obj = world.remove_non_send_resource::<IOSViewObj>().unwrap();
+    #[cfg(target_os = "android")]
+    let view_obj = world.remove_non_send_resource::<AndroidViewObj>().unwrap();
 
     let world = world.cell();
     let mut app_views = world.non_send_resource_mut::<AppViews>();
@@ -95,5 +88,6 @@ fn handle_create_window_events(
         world.send_event(WindowCreated {
             id: create_window_event.id,
         });
+        println!("handle_create_window_events---- 1");
     }
 }

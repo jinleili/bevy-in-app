@@ -1,55 +1,22 @@
-use crate::{
-    app_view::{AppViewPlugin, IOSViewObj},
-    breakout::*,
-};
+use crate::app_view::{app_runner, IOSViewObj};
 use bevy::input::{
     keyboard::KeyboardInput,
     touch::{TouchInput, TouchPhase},
     ButtonState,
 };
-use bevy::winit::WinitPlugin;
-use bevy::{prelude::*, time::FixedTimestep};
+use bevy::prelude::*;
 
 #[no_mangle]
 pub fn create_bevy_app(view: *mut objc::runtime::Object, scale_factor: f32) -> *mut libc::c_void {
-    let ios_obj = IOSViewObj { view, scale_factor };
-    let mut bevy_app = App::new();
-    bevy_app
-        .insert_resource(ClearColor(Color::rgb(0.8, 0.4, 0.6)))
-        .insert_non_send_resource(ios_obj);
-    bevy_app
-        .add_plugins(
-            DefaultPlugins
-                .build()
-                .disable::<WinitPlugin>()
-                .set(WindowPlugin {
-                    window: WindowDescriptor {
-                        resizable: false,
-                        mode: WindowMode::BorderlessFullscreen,
-                        ..default()
-                    },
-                    ..default()
-                }),
-        )
-        .add_plugin(AppViewPlugin)
-        // .add_startup_system(crate::setup)
-        // .add_system(crate::button_system);
-        .insert_resource(Scoreboard { score: 0 })
-        .insert_resource(ClearColor(BACKGROUND_COLOR))
-        .add_startup_system(setup)
-        .add_event::<CollisionEvent>()
-        .add_system_set(
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-                .with_system(check_for_collisions)
-                .with_system(move_paddle.before(check_for_collisions))
-                .with_system(apply_velocity.before(check_for_collisions))
-                .with_system(play_collision_sound.after(check_for_collisions)),
-        )
-        .add_system(update_scoreboard)
-        .add_system(bevy::window::close_on_esc);
+    println!("create_bevy_app ---- 0");
+    let mut bevy_app = crate::create_breakout_app();
+    println!("create_breakout_app ----");
 
-    crate::app_view::app_runner(&mut bevy_app);
+    let ios_obj = IOSViewObj { view, scale_factor };
+    bevy_app.insert_non_send_resource(ios_obj);
+    println!("insert_non_send_resource ----");
+
+    app_runner(&mut bevy_app);
 
     let box_obj = Box::new(bevy_app);
     // into_raw 返回指针的同时，将此对象的内存管理权转交给调用方

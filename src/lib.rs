@@ -1,10 +1,11 @@
+#[cfg(any(target_os = "android", target_os = "ios"))]
 mod app_view;
 
-#[cfg_attr(target_os = "ios", path = "ffi/ios.rs")]
-#[cfg_attr(target_os = "android", path = "ffi/android.rs", allow(non_snake_case))]
+// #[cfg_attr(target_os = "ios", path = "ffi/ios.rs")]
+// #[cfg_attr(target_os = "android", path = "ffi/android.rs", allow(non_snake_case))]
+#[cfg(any(target_os = "android", target_os = "ios"))]
 mod ffi;
-
-#[cfg(all(target_os = "android", target_os = "ios"))]
+#[cfg(any(target_os = "android", target_os = "ios"))]
 pub use ffi::*;
 
 #[derive(Resource)]
@@ -20,74 +21,58 @@ impl std::ops::Deref for AppWindowSize {
 }
 
 use bevy::prelude::*;
-pub mod breakout;
+#[allow(unused_imports)]
+use bevy::winit::WinitPlugin;
 
-const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
-const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
+mod breakout;
+pub fn create_breakout_app() -> App {
+    use bevy::time::FixedTimestep;
+    use breakout::*;
+    let mut bevy_app = App::new();
+    #[allow(unused_mut)]
+    let mut default_plugins = DefaultPlugins.build();
 
-pub fn button_system(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &Children),
-        (Changed<Interaction>, With<Button>),
-    >,
-    mut text_query: Query<&mut Text>,
-) {
-    for (interaction, mut color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Clicked => {
-                text.sections[0].value = "Press".to_string();
-                *color = PRESSED_BUTTON.into();
-            }
-            Interaction::Hovered => {
-                text.sections[0].value = "Hover".to_string();
-                *color = HOVERED_BUTTON.into();
-            }
-            Interaction::None => {
-                text.sections[0].value = "Button".to_string();
-                *color = NORMAL_BUTTON.into();
-            }
-        }
-    }
-}
-
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // ui camera
-    commands.spawn(Camera2dBundle::default());
-    commands
-        .spawn(NodeBundle {
-            style: Style {
-                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                align_items: AlignItems::FlexStart,
-                justify_content: JustifyContent::Center,
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    {
+        default_plugins = default_plugins.disable::<WinitPlugin>().set(WindowPlugin {
+            window: WindowDescriptor {
+                resizable: false,
+                mode: WindowMode::BorderlessFullscreen,
                 ..default()
             },
             ..default()
-        })
-        .with_children(|parent| {
-            parent
-                .spawn(ButtonBundle {
-                    style: Style {
-                        size: Size::new(Val::Px(150.0), Val::Px(65.0)),
-                        // horizontally center child text
-                        justify_content: JustifyContent::Center,
-                        // vertically center child text
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    background_color: NORMAL_BUTTON.into(),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Button",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 40.0,
-                            color: Color::rgb(0.9, 0.9, 0.9),
-                        },
-                    ));
-                });
         });
+
+        if cfg!(target_os = "android") {
+            default_plugins = default_plugins.disable::<bevy::audio::AudioPlugin>();
+        }
+    }
+    bevy_app
+        .insert_resource(ClearColor(Color::rgb(0.8, 0.4, 0.6)))
+        .add_plugins(default_plugins);
+
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    bevy_app.add_plugin(app_view::AppViewPlugin);
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    bevy_app.add_system(bevy::window::close_on_esc);
+
+    let mut system_set = SystemSet::new();
+    system_set = system_set
+        .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
+        .with_system(check_for_collisions)
+        .with_system(move_paddle.before(check_for_collisions))
+        .with_system(apply_velocity.before(check_for_collisions));
+    if cfg!(not(target_os = "android")) {
+        system_set = system_set.with_system(play_collision_sound.after(check_for_collisions));
+    }
+
+    bevy_app
+        .insert_resource(Scoreboard { score: 0 })
+        .insert_resource(ClearColor(BACKGROUND_COLOR))
+        .add_startup_system(setup)
+        .add_event::<CollisionEvent>()
+        .add_system_set(system_set)
+        .add_system(update_scoreboard);
+
+    bevy_app
 }

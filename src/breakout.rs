@@ -164,8 +164,11 @@ pub fn setup(
     commands.spawn(Camera2dBundle::default());
 
     // Sound
-    let ball_collision_sound = asset_server.load("sounds/breakout_collision.ogg");
-    commands.insert_resource(CollisionSound(ball_collision_sound));
+    #[cfg(not(target_os = "android"))]
+    {
+        let ball_collision_sound = asset_server.load("sounds/breakout_collision.ogg");
+        commands.insert_resource(CollisionSound(ball_collision_sound));
+    }
 
     // Paddle
     let paddle_y = BOTTOM_WALL + GAP_BETWEEN_PADDLE_AND_FLOOR;

@@ -36,7 +36,7 @@ core-graphics = "*"
 objc = "*"
 
 [target.'cfg(target_os = "android")'.dependencies]
-android_logger = "0.10.1"
 jni = "0.19"
 jni_fn = "0.1"
 ndk-sys = "*"
+log-panics = "*"
