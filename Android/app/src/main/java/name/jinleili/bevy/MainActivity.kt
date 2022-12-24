@@ -41,7 +41,7 @@ var surfaceView: BevySurfaceView? = null
 fun SurfaceCard() {
     var selected by remember { mutableStateOf("Breakout") }
     val toggleValues = listOf("Breakout", "XXX",)
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenWidth = LocalConfiguration.current.screenWidthDp
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -84,7 +84,7 @@ fun SurfaceCard() {
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(screenWidth),
+                .height((screenWidth.toFloat() * 1.6).dp),
         )
     }
 }

@@ -76,3 +76,23 @@ pub fn create_breakout_app() -> App {
 
     bevy_app
 }
+
+use bevy::input::{keyboard::KeyboardInput, ButtonState};
+
+#[allow(unused)]
+pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState) {
+    let input = KeyboardInput {
+        scan_code: if key_code == KeyCode::Left { 123 } else { 124 },
+        state,
+        key_code: Some(key_code),
+    };
+    app.world.cell().send_event(input);
+}
+
+#[allow(unused)]
+pub(crate) fn close_bevy_window(mut app: Box<App>) {
+    let mut windows = app.world.resource_mut::<Windows>();
+    if let Some(window) = windows.get_focused_mut() {
+        window.close();
+    }
+}

@@ -1,6 +1,5 @@
 use crate::app_view::{app_runner, IOSViewObj};
 use bevy::input::{
-    keyboard::KeyboardInput,
     touch::{TouchInput, TouchPhase},
     ButtonState,
 };
@@ -70,44 +69,22 @@ pub fn accelerometer_motion(_obj: *mut libc::c_void, _x: f32, _y: f32, _z: f32) 
 
 #[no_mangle]
 pub fn device_motion(obj: *mut libc::c_void, x: f32, _y: f32, _z: f32) {
-    let mut input = KeyboardInput {
-        scan_code: 0,
-        state: ButtonState::Pressed,
-        key_code: None,
-    };
     let app = unsafe { &mut *(obj as *mut App) };
     if x > 0.005 {
-        release_input(app, KeyCode::Left);
-        input.scan_code = 124;
-        input.key_code = Some(KeyCode::Right);
+        crate::change_input(app, KeyCode::Left, ButtonState::Released);
+        crate::change_input(app, KeyCode::Right, ButtonState::Pressed);
     } else if x < -0.005 {
-        release_input(app, KeyCode::Right);
-        input.scan_code = 123;
-        input.key_code = Some(KeyCode::Left);
+        crate::change_input(app, KeyCode::Right, ButtonState::Released);
+        crate::change_input(app, KeyCode::Left, ButtonState::Pressed);
     } else {
-        release_input(app, KeyCode::Left);
-        release_input(app, KeyCode::Right);
+        crate::change_input(app, KeyCode::Left, ButtonState::Released);
+        crate::change_input(app, KeyCode::Right, ButtonState::Released);
     }
-    if input.key_code.is_some() {
-        app.world.cell().send_event(input);
-    }
-}
-
-fn release_input(app: &mut App, key_code: KeyCode) {
-    let input = KeyboardInput {
-        scan_code: if key_code == KeyCode::Left { 123 } else { 124 },
-        state: ButtonState::Released,
-        key_code: Some(key_code),
-    };
-    app.world.cell().send_event(input);
 }
 
 #[no_mangle]
 pub fn release_bevy_app(obj: *mut libc::c_void) {
     // 将指针转换为其指代的实际 Rust 对象，同时也拿回此对象的内存管理权
-    let mut app: Box<App> = unsafe { Box::from_raw(obj as *mut _) };
-    let mut windows = app.world.resource_mut::<Windows>();
-    if let Some(window) = windows.get_focused_mut() {
-        window.close();
-    }
+    let app: Box<App> = unsafe { Box::from_raw(obj as *mut _) };
+    crate::close_bevy_window(app);
 }

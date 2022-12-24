@@ -17,7 +17,8 @@
         android:theme="@style/Theme.Wgpu">
         <activity
             android:name="name.jinleili.bevy.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
