@@ -37,7 +37,7 @@ impl AppView {
         unsafe {
             // 获取与安卓端 surface 对象关联的 ANativeWindow，以便能通过 Rust 与之交互。
             // 此函数在返回 ANativeWindow 的同时会自动将其引用计数 +1，以防止该对象在安卓端被意外释放。
-            ndk_sys::ANativeWindow_fromSurface(env as *mut _, surface as *mut _)
+            ndk_sys::ANativeWindow_fromSurface(env as _, surface as _)
         }
     }
 

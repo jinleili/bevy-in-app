@@ -1,12 +1,14 @@
 package name.jinleili.bevy
 
 import android.view.Surface
+import android.content.Context
 
 class RustBridge {
     init {
         System.loadLibrary("bevy_in_app")
     }
 
+    external fun init_ndk_context(ctx: Context,)
     external fun create_bevy_app(surface: Surface, scale_factor: Float): Long
     external fun enter_frame(bevy_app: Long)
     external fun device_motion(bevy_app: Long, x: Float, y: Float, z: Float)

@@ -1,8 +1,8 @@
+use bevy::prelude::*;
+
 #[cfg(any(target_os = "android", target_os = "ios"))]
 mod app_view;
 
-// #[cfg_attr(target_os = "ios", path = "ffi/ios.rs")]
-// #[cfg_attr(target_os = "android", path = "ffi/android.rs", allow(non_snake_case))]
 #[cfg(any(target_os = "android", target_os = "ios"))]
 mod ffi;
 #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -20,14 +20,13 @@ impl std::ops::Deref for AppWindowSize {
     }
 }
 
-use bevy::prelude::*;
-#[allow(unused_imports)]
-use bevy::winit::WinitPlugin;
-
 mod breakout;
 pub fn create_breakout_app() -> App {
     use bevy::time::FixedTimestep;
+    #[allow(unused_imports)]
+    use bevy::winit::WinitPlugin;
     use breakout::*;
+
     let mut bevy_app = App::new();
     #[allow(unused_mut)]
     let mut default_plugins = DefaultPlugins.build();
@@ -43,9 +42,9 @@ pub fn create_breakout_app() -> App {
             ..default()
         });
 
-        if cfg!(target_os = "android") {
-            default_plugins = default_plugins.disable::<bevy::audio::AudioPlugin>();
-        }
+        // if cfg!(target_os = "android") {
+        //     default_plugins = default_plugins.disable::<bevy::audio::AudioPlugin>();
+        // }
     }
     bevy_app
         .insert_resource(ClearColor(Color::rgb(0.8, 0.4, 0.6)))

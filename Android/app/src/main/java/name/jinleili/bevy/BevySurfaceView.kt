@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.hardware.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 
@@ -40,6 +39,8 @@ class BevySurfaceView : SurfaceView, SurfaceHolder.Callback2 {
     // 绘制表面被创建后，创建/重新创建 Bevy App
     override fun surfaceCreated(holder: SurfaceHolder) {
         holder.let { h ->
+            rustBrige.init_ndk_context(this.context)
+
             // Get the screen's density scale
             val scaleFactor: Float = resources.displayMetrics.density
             bevy_app = rustBrige.create_bevy_app(h.surface, scaleFactor)

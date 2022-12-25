@@ -191,6 +191,7 @@ dependencies = [
  "jni_fn",
  "libc",
  "log-panics",
+ "ndk-context",
  "ndk-sys 0.4.1+23.1.7779620",
  "objc",
  "raw-window-handle 0.5.0",

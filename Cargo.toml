@@ -16,6 +16,7 @@ raw-window-handle = "0.5"
 wgpu = "0.14"
 bevy = { path = "../bevy", features = [
     "bevy_audio",
+    "bevy_asset",
     "bevy_sprite",
     "bevy_winit",
     "bevy_core_pipeline",
@@ -39,4 +40,5 @@ objc = "*"
 jni = "0.19"
 jni_fn = "0.1"
 ndk-sys = "*"
+ndk-context = "*"
 log-panics = "*"
