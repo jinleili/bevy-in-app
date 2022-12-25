@@ -15,11 +15,6 @@ use bevy::window::{
 mod app_view;
 pub use app_view::*;
 
-#[cfg(target_os = "android")]
-mod android_asset_io;
-#[cfg(target_os = "android")]
-pub(crate) use android_asset_io::*;
-
 mod app_views;
 use app_views::AppViews;
 

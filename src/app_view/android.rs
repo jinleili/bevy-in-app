@@ -45,10 +45,6 @@ impl AppView {
         Self { view_obj }
     }
 
-    pub fn scale_factor(&self) -> f32 {
-        self.scale_factor
-    }
-
     pub fn inner_size(&self) -> (u32, u32) {
         (self.get_width(), self.get_height())
     }

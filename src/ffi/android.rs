@@ -1,4 +1,7 @@
-use crate::app_view::{AndroidAssetManager, AndroidViewObj, AppView};
+use crate::{
+    android_asset_io::AndroidAssetManager,
+    app_view::{AndroidViewObj, AppView},
+};
 use bevy::input::ButtonState;
 use bevy::prelude::*;
 use jni::sys::{jfloat, jlong, jobject};

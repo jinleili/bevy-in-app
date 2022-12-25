@@ -8,6 +8,9 @@ mod ffi;
 #[cfg(any(target_os = "android", target_os = "ios"))]
 pub use ffi::*;
 
+#[cfg(target_os = "android")]
+mod android_asset_io;
+
 #[derive(Resource)]
 pub struct AppWindowSize {
     pub size: Vec2,
@@ -23,7 +26,7 @@ impl std::ops::Deref for AppWindowSize {
 mod breakout;
 #[allow(unused_variables)]
 pub fn create_breakout_app(
-    #[cfg(target_os = "android")] android_asset_manager: app_view::AndroidAssetManager,
+    #[cfg(target_os = "android")] android_asset_manager: android_asset_io::AndroidAssetManager,
 ) -> App {
     use bevy::time::FixedTimestep;
     #[allow(unused_imports)]
@@ -31,8 +34,6 @@ pub fn create_breakout_app(
     use breakout::*;
 
     let mut bevy_app = App::new();
-    #[cfg(target_os = "android")]
-    bevy_app.insert_non_send_resource(android_asset_manager);
 
     #[allow(unused_mut)]
     let mut default_plugins = DefaultPlugins.build();
@@ -47,31 +48,33 @@ pub fn create_breakout_app(
             },
             ..default()
         });
+    }
 
-        if cfg!(target_os = "android") {
-            use bevy::render::{
-                settings::{WgpuSettings, WgpuSettingsPriority},
-                RenderPlugin,
-            };
-            default_plugins = default_plugins.set(RenderPlugin {
-                // This configures the app to use the most compatible rendering settings.
-                // They help with compatibility with as many devices as possible.
-                wgpu_settings: WgpuSettings {
-                    priority: WgpuSettingsPriority::Compatibility,
-                    backends: Some(wgpu::Backends::VULKAN),
-                    ..default()
-                },
-            });
-            // the custom asset io plugin must be inserted in-between the
-            // `CorePlugin' and `AssetPlugin`. It needs to be after the
-            // CorePlugin, so that the IO task pool has already been constructed.
-            // And it must be before the `AssetPlugin` so that the asset plugin
-            // doesn't create another instance of an asset server. In general,
-            // the AssetPlugin should still run so that other aspects of the
-            // asset system are initialized correctly.
-            default_plugins = default_plugins
-                .add_before::<bevy::asset::AssetPlugin, _>(app_view::AndroidAssetIoPlugin);
-        }
+    #[cfg(target_os = "android")]
+    {
+        bevy_app.insert_non_send_resource(android_asset_manager);
+        use bevy::render::{
+            settings::{WgpuSettings, WgpuSettingsPriority},
+            RenderPlugin,
+        };
+        default_plugins = default_plugins.set(RenderPlugin {
+            // This configures the app to use the most compatible rendering settings.
+            // They help with compatibility with as many devices as possible.
+            wgpu_settings: WgpuSettings {
+                priority: WgpuSettingsPriority::Compatibility,
+                backends: Some(wgpu::Backends::VULKAN),
+                ..default()
+            },
+        });
+        // the custom asset io plugin must be inserted in-between the
+        // `CorePlugin' and `AssetPlugin`. It needs to be after the
+        // CorePlugin, so that the IO task pool has already been constructed.
+        // And it must be before the `AssetPlugin` so that the asset plugin
+        // doesn't create another instance of an asset server. In general,
+        // the AssetPlugin should still run so that other aspects of the
+        // asset system are initialized correctly.
+        default_plugins = default_plugins
+            .add_before::<bevy::asset::AssetPlugin, _>(android_asset_io::AndroidAssetIoPlugin);
     }
     bevy_app
         .insert_resource(ClearColor(Color::rgb(0.8, 0.4, 0.6)))

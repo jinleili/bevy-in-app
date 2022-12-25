@@ -17,14 +17,14 @@ impl AppViews {
         window_descriptor: &WindowDescriptor,
     ) -> Window {
         let app_view = AppView::new(view_obj);
-        let scale_factor = app_view.scale_factor();
+        let scale_factor = app_view.scale_factor;
         let inner_size = app_view.inner_size();
         let raw_handle = RawHandleWrapper {
             window_handle: app_view.raw_window_handle(),
             display_handle: app_view.raw_display_handle(),
         };
         self.views.insert(window_id, app_view);
-
+        bevy::log::info!("----- size: {:?}, {}", inner_size, scale_factor);
         Window::new(
             window_id,
             window_descriptor,

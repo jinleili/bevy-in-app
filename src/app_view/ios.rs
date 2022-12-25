@@ -25,25 +25,28 @@ pub struct AppView {
     pub view_obj: IOSViewObj,
 }
 
+impl std::ops::Deref for AppView {
+    type Target = IOSViewObj;
+    fn deref(&self) -> &Self::Target {
+        &self.view_obj
+    }
+}
+
 impl AppView {
     pub fn new(view_obj: IOSViewObj) -> Self {
         Self { view_obj }
     }
 
-    pub fn scale_factor(&self) -> f32 {
-        self.view_obj.scale_factor
-    }
-
     pub fn inner_size(&self) -> (u32, u32) {
         let logical_res = self.logical_resolution();
         (
-            (logical_res.0 * self.view_obj.scale_factor) as u32,
-            (logical_res.1 * self.view_obj.scale_factor) as u32,
+            (logical_res.0 * self.scale_factor) as u32,
+            (logical_res.1 * self.scale_factor) as u32,
         )
     }
 
     pub fn logical_resolution(&self) -> (f32, f32) {
-        let s: CGRect = unsafe { msg_send![self.view_obj.view, frame] };
+        let s: CGRect = unsafe { msg_send![self.view, frame] };
         (s.size.width as f32, s.size.height as f32)
     }
 }
@@ -51,7 +54,7 @@ impl AppView {
 unsafe impl HasRawWindowHandle for AppView {
     fn raw_window_handle(&self) -> RawWindowHandle {
         let mut handle = UiKitWindowHandle::empty();
-        handle.ui_view = self.view_obj.view as _;
+        handle.ui_view = self.view as _;
         RawWindowHandle::UiKit(handle)
     }
 }

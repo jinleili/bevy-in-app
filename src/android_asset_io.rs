@@ -22,6 +22,27 @@ impl Default for AndroidAssetManager {
     }
 }
 
+pub struct AndroidAssetIoPlugin;
+
+impl Plugin for AndroidAssetIoPlugin {
+    fn build(&self, app: &mut App) {
+        let android_asset_manager = app
+            .world
+            .remove_non_send_resource::<AndroidAssetManager>()
+            .unwrap();
+        let asset_manager = unsafe {
+            AssetManager::from_ptr(
+                std::ptr::NonNull::new(android_asset_manager.a_asset_manager).unwrap(),
+            )
+        };
+        // create the custom AndroidAssetIo instance
+        let asset_io = AndroidAssetIo::new("assets".to_string(), asset_manager);
+
+        // the asset server is constructed and added the resource manager
+        app.insert_resource(AssetServer::new(asset_io));
+    }
+}
+
 struct AndroidAssetIo {
     root_path: PathBuf,
     asset_manager: AssetManager,
@@ -75,26 +96,5 @@ impl AssetIo for AndroidAssetIo {
                     e.into()
                 }
             })
-    }
-}
-
-pub struct AndroidAssetIoPlugin;
-
-impl Plugin for AndroidAssetIoPlugin {
-    fn build(&self, app: &mut App) {
-        let android_asset_manager = app
-            .world
-            .remove_non_send_resource::<AndroidAssetManager>()
-            .unwrap();
-        let asset_manager = unsafe {
-            AssetManager::from_ptr(
-                std::ptr::NonNull::new(android_asset_manager.a_asset_manager).unwrap(),
-            )
-        };
-        // create the custom AndroidAssetIo instance
-        let asset_io = AndroidAssetIo::new("assets".to_string(), asset_manager);
-
-        // the asset server is constructed and added the resource manager
-        app.insert_resource(AssetServer::new(asset_io));
     }
 }
