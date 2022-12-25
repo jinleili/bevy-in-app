@@ -21,13 +21,19 @@ impl std::ops::Deref for AppWindowSize {
 }
 
 mod breakout;
-pub fn create_breakout_app() -> App {
+#[allow(unused_variables)]
+pub fn create_breakout_app(
+    #[cfg(target_os = "android")] android_asset_manager: app_view::AndroidAssetManager,
+) -> App {
     use bevy::time::FixedTimestep;
     #[allow(unused_imports)]
     use bevy::winit::WinitPlugin;
     use breakout::*;
 
     let mut bevy_app = App::new();
+    #[cfg(target_os = "android")]
+    bevy_app.insert_non_send_resource(android_asset_manager);
+
     #[allow(unused_mut)]
     let mut default_plugins = DefaultPlugins.build();
 
@@ -56,6 +62,15 @@ pub fn create_breakout_app() -> App {
                     ..default()
                 },
             });
+            // the custom asset io plugin must be inserted in-between the
+            // `CorePlugin' and `AssetPlugin`. It needs to be after the
+            // CorePlugin, so that the IO task pool has already been constructed.
+            // And it must be before the `AssetPlugin` so that the asset plugin
+            // doesn't create another instance of an asset server. In general,
+            // the AssetPlugin should still run so that other aspects of the
+            // asset system are initialized correctly.
+            default_plugins = default_plugins
+                .add_before::<bevy::asset::AssetPlugin, _>(app_view::AndroidAssetIoPlugin);
         }
     }
     bevy_app

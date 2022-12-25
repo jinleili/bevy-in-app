@@ -1,4 +1,4 @@
-use crate::app_view::{AndroidViewObj, AppView};
+use crate::app_view::{AndroidAssetManager, AndroidViewObj, AppView};
 use bevy::input::ButtonState;
 use bevy::prelude::*;
 use jni::sys::{jfloat, jlong, jobject};
@@ -13,7 +13,6 @@ extern "C" {}
 pub fn init_ndk_context(env: JNIEnv, _: jobject, context: jobject) {
     log_panics::init();
     let java_vm = env.get_java_vm().unwrap();
-    // let class_ctx = env.find_class("android/content/Context").unwrap();
     unsafe {
         ndk_context::initialize_android_context(java_vm.get_java_vm_pointer() as _, context as _);
     }
@@ -24,14 +23,17 @@ pub fn init_ndk_context(env: JNIEnv, _: jobject, context: jobject) {
 pub fn create_bevy_app(
     env: *mut JNIEnv,
     _: jobject,
+    asset_manager: jobject,
     surface: jobject,
     scale_factor: jfloat,
 ) -> jlong {
-    let mut bevy_app = crate::create_breakout_app();
+    let a_asset_manager = unsafe { ndk_sys::AAssetManager_fromJava(env as _, asset_manager) };
     let android_obj = AndroidViewObj {
         native_window: AppView::get_native_window(env, surface),
         scale_factor: scale_factor as _,
     };
+
+    let mut bevy_app = crate::create_breakout_app(AndroidAssetManager { a_asset_manager });
     bevy_app.insert_non_send_resource(android_obj);
 
     crate::app_view::app_runner(&mut bevy_app);
@@ -43,8 +45,8 @@ pub fn create_bevy_app(
 #[no_mangle]
 #[jni_fn("name.jinleili.bevy.RustBridge")]
 pub fn enter_frame(_env: *mut JNIEnv, _: jobject, obj: jlong) {
-    let obj = unsafe { &mut *(obj as *mut App) };
-    obj.update();
+    let bevy_app = unsafe { &mut *(obj as *mut App) };
+    bevy_app.update();
 }
 
 #[no_mangle]

@@ -396,6 +396,5 @@ pub fn play_collision_sound(
         // This prevents events staying active on the next frame.
         collision_events.clear();
         audio.play(sound.0.clone());
-        info!("play_collision_sound play {:?}", &sound.0);
     }
 }

@@ -15,6 +15,11 @@ use bevy::window::{
 mod app_view;
 pub use app_view::*;
 
+#[cfg(target_os = "android")]
+mod android_asset_io;
+#[cfg(target_os = "android")]
+pub(crate) use android_asset_io::*;
+
 mod app_views;
 use app_views::AppViews;
 
@@ -42,8 +47,6 @@ fn change_window(
 
 #[allow(unused)]
 pub fn app_runner(app: &mut App) {
-    println!("app_runner----");
-
     let mut create_window_event_reader = app
         .world
         .remove_resource::<AppCreateWindowReader>()
@@ -62,7 +65,6 @@ fn handle_create_window_events(
     world: &mut World,
     create_window_event_reader: &mut ManualEventReader<CreateWindow>,
 ) {
-    println!("handle_create_window_events----");
     #[cfg(target_os = "ios")]
     let view_obj = world.remove_non_send_resource::<IOSViewObj>().unwrap();
     #[cfg(target_os = "android")]
@@ -88,6 +90,5 @@ fn handle_create_window_events(
         world.send_event(WindowCreated {
             id: create_window_event.id,
         });
-        println!("handle_create_window_events---- 1");
     }
 }

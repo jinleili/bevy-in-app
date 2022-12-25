@@ -7,16 +7,13 @@ use bevy::prelude::*;
 
 #[no_mangle]
 pub fn create_bevy_app(view: *mut objc::runtime::Object, scale_factor: f32) -> *mut libc::c_void {
-    println!("create_bevy_app ---- 0");
     let mut bevy_app = crate::create_breakout_app();
-    println!("create_breakout_app ----");
-
     let ios_obj = IOSViewObj { view, scale_factor };
     bevy_app.insert_non_send_resource(ios_obj);
-    println!("insert_non_send_resource ----");
 
     app_runner(&mut bevy_app);
 
+    info!("Bevy App created!");
     let box_obj = Box::new(bevy_app);
     // into_raw 返回指针的同时，将此对象的内存管理权转交给调用方
     Box::into_raw(box_obj) as *mut libc::c_void

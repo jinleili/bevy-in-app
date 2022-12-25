@@ -188,6 +188,7 @@ dependencies = [
  "jni_fn",
  "libc",
  "log-panics",
+ "ndk 0.7.0",
  "ndk-context",
  "ndk-sys 0.4.1+23.1.7779620",
  "objc",

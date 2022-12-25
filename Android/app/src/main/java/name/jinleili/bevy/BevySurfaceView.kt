@@ -43,7 +43,7 @@ class BevySurfaceView : SurfaceView, SurfaceHolder.Callback2 {
 
             // Get the screen's density scale
             val scaleFactor: Float = resources.displayMetrics.density
-            bevy_app = rustBrige.create_bevy_app(h.surface, scaleFactor)
+            bevy_app = rustBrige.create_bevy_app(this.context.assets, h.surface, scaleFactor)
 
             // SurfaceView 默认不会自动开始绘制，setWillNotDraw(false) 用于通知 App 已经准备好开始绘制了。
             setWillNotDraw(false)
