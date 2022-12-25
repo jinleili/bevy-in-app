@@ -1,6 +1,14 @@
 # Bevy in App
 Integrate the [Bevy engine](https://github.com/bevyengine/bevy) into existing iOS | Android apps. 
 
+If you want to add a mini-game to an existing app, or implement some dynamic UI components, charts ..., or just want to take advantage of the **Motion Sensors** on your phone for some cool gameplay, you can't use `WinitPlugin`. Because `winit` will take over the entire App initialization process and windowing, but we need to create `bevy::App` in an existing App instance, and we may also want `bevy::App` to run in an `iOS UIView` or `Android SurfaceView` of any size.  
+  
+This repository implements such a scenario and uses the phone's motion sensor to play breakout mini-games.  
+
+## Screenshot
+|![Bevy in iOS App](assets/bevy_in_ios.png)|![Bevy in Android App](assets/bevy_in_android.png)|
+|---|---|
+
 ## **iOS**
 
 ```sh

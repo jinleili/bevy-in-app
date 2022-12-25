@@ -51,30 +51,30 @@ fun SurfaceCard() {
                 .padding(horizontal = 0.dp, vertical = 7.dp)
                 .fillMaxWidth()
         ) {
-            Text(text = "Bevy on Android", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Bevy on Android App", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .height(54.dp)
-                .padding(horizontal = 0.dp, vertical = 9.dp)
-                .fillMaxWidth()
-        ) {
-            ToggleButton(
-                currentSelection = selected,
-                toggleStates = toggleValues,
-                onToggleChange = { title ->
-                    selected = title
-                    toggleValues.forEachIndexed { idx, v ->
-                        if (v == title) {
-                            surfaceView?.changeExample(idx)
-                        }
-                    }
-                },
-            )
-
-        }
+//        Row(
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.Center,
+//            modifier = Modifier
+//                .height(54.dp)
+//                .padding(horizontal = 0.dp, vertical = 9.dp)
+//                .fillMaxWidth()
+//        ) {
+//            ToggleButton(
+//                currentSelection = selected,
+//                toggleStates = toggleValues,
+//                onToggleChange = { title ->
+//                    selected = title
+//                    toggleValues.forEachIndexed { idx, v ->
+//                        if (v == title) {
+//                            surfaceView?.changeExample(idx)
+//                        }
+//                    }
+//                },
+//            )
+//
+//        }
         Spacer(modifier = Modifier.height(8.dp))
         AndroidView(
             factory = { ctx ->
