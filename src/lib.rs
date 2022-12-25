@@ -42,9 +42,21 @@ pub fn create_breakout_app() -> App {
             ..default()
         });
 
-        // if cfg!(target_os = "android") {
-        //     default_plugins = default_plugins.disable::<bevy::audio::AudioPlugin>();
-        // }
+        if cfg!(target_os = "android") {
+            use bevy::render::{
+                settings::{WgpuSettings, WgpuSettingsPriority},
+                RenderPlugin,
+            };
+            default_plugins = default_plugins.set(RenderPlugin {
+                // This configures the app to use the most compatible rendering settings.
+                // They help with compatibility with as many devices as possible.
+                wgpu_settings: WgpuSettings {
+                    priority: WgpuSettingsPriority::Compatibility,
+                    backends: Some(wgpu::Backends::VULKAN),
+                    ..default()
+                },
+            });
+        }
     }
     bevy_app
         .insert_resource(ClearColor(Color::rgb(0.8, 0.4, 0.6)))
@@ -55,22 +67,19 @@ pub fn create_breakout_app() -> App {
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     bevy_app.add_system(bevy::window::close_on_esc);
 
-    let mut system_set = SystemSet::new();
-    system_set = system_set
-        .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-        .with_system(check_for_collisions)
-        .with_system(move_paddle.before(check_for_collisions))
-        .with_system(apply_velocity.before(check_for_collisions));
-    if cfg!(not(target_os = "android")) {
-        system_set = system_set.with_system(play_collision_sound.after(check_for_collisions));
-    }
-
     bevy_app
         .insert_resource(Scoreboard { score: 0 })
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_startup_system(setup)
         .add_event::<CollisionEvent>()
-        .add_system_set(system_set)
+        .add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
+                .with_system(check_for_collisions)
+                .with_system(move_paddle.before(check_for_collisions))
+                .with_system(apply_velocity.before(check_for_collisions))
+                .with_system(play_collision_sound.after(check_for_collisions)),
+        )
         .add_system(update_scoreboard);
 
     bevy_app

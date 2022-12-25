@@ -164,11 +164,8 @@ pub fn setup(
     commands.spawn(Camera2dBundle::default());
 
     // Sound
-    #[cfg(not(target_os = "android"))]
-    {
-        let ball_collision_sound = asset_server.load("sounds/breakout_collision.ogg");
-        commands.insert_resource(CollisionSound(ball_collision_sound));
-    }
+    let ball_collision_sound = asset_server.load("sounds/breakout_collision.ogg");
+    commands.insert_resource(CollisionSound(ball_collision_sound));
 
     // Paddle
     let paddle_y = BOTTOM_WALL + GAP_BETWEEN_PADDLE_AND_FLOOR;
@@ -399,5 +396,6 @@ pub fn play_collision_sound(
         // This prevents events staying active on the next frame.
         collision_events.clear();
         audio.play(sound.0.clone());
+        info!("play_collision_sound play {:?}", &sound.0);
     }
 }
