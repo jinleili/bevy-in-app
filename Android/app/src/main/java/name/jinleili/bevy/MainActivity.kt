@@ -51,7 +51,7 @@ fun SurfaceCard() {
                 .padding(horizontal = 0.dp, vertical = 7.dp)
                 .fillMaxWidth()
         ) {
-            Text(text = "Bevy on Android App", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Bevy in Android App", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
 //        Row(
 //            verticalAlignment = Alignment.CenterVertically,

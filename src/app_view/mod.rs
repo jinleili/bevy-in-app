@@ -1,11 +1,11 @@
-use bevy::math::Vec2;
-use bevy_app::{App, CoreStage, Plugin};
-use bevy_ecs::prelude::*;
-use bevy_ecs::{
+use bevy::app::{App, CoreStage, Plugin};
+use bevy::ecs::{
     event::{Events, ManualEventReader},
+    prelude::*,
     world::World,
 };
-use bevy_window::{
+use bevy::math::Vec2;
+use bevy::window::{
     CreateWindow, ModifiesWindows, WindowClosed, WindowCreated, WindowResized,
     WindowScaleFactorChanged, Windows,
 };

@@ -1,6 +1,6 @@
 use super::AppView;
-use bevy_utils::HashMap;
-use bevy_window::{RawHandleWrapper, Window, WindowDescriptor, WindowId};
+use bevy::utils::HashMap;
+use bevy::window::{RawHandleWrapper, Window, WindowDescriptor, WindowId};
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
 
 #[derive(Debug, Default)]

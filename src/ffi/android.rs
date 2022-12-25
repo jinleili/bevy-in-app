@@ -1,8 +1,7 @@
 use crate::app_view::{AndroidViewObj, AppView};
 use bevy::input::ButtonState;
 use bevy::prelude::*;
-use jni::objects::JClass;
-use jni::sys::{jfloat, jint, jlong, jobject};
+use jni::sys::{jfloat, jlong, jobject};
 use jni::JNIEnv;
 use jni_fn::jni_fn;
 
