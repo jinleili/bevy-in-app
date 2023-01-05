@@ -53,15 +53,10 @@ pub fn create_breakout_app(
     #[cfg(target_os = "android")]
     {
         bevy_app.insert_non_send_resource(android_asset_manager);
-        use bevy::render::{
-            settings::{WgpuSettings, WgpuSettingsPriority},
-            RenderPlugin,
-        };
+
+        use bevy::render::{settings::WgpuSettings, RenderPlugin};
         default_plugins = default_plugins.set(RenderPlugin {
-            // This configures the app to use the most compatible rendering settings.
-            // They help with compatibility with as many devices as possible.
             wgpu_settings: WgpuSettings {
-                priority: WgpuSettingsPriority::Compatibility,
                 backends: Some(wgpu::Backends::VULKAN),
                 ..default()
             },

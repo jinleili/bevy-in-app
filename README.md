@@ -15,8 +15,8 @@ This repository implements such a scenario and uses the phone's motion sensor to
 # Add iOS target
 rustup target add aarch64-apple-ios 
 
-# Build for iOS device
-sh ./ios_debug.sh
+# Build for iOS target
+sh ./ios_build.sh
 ```
 
 Then, Open `iOS/bevy_in_iOS.xcodeproj` with Xcode，connect an iOS device and run. 
@@ -53,5 +53,5 @@ rustup target add aarch64-linux-android
 cargo install cargo-so
 
 # Build
-sh ./android_debug.sh
+sh ./android_build.sh
 ```

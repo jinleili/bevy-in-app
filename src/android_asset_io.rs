@@ -10,15 +10,11 @@ use std::{
     path::{Path, PathBuf},
 };
 
-pub struct AndroidAssetManager {
-    pub a_asset_manager: *mut ndk_sys::AAssetManager,
-}
+pub struct AndroidAssetManager(pub *mut ndk_sys::AAssetManager);
 
 impl Default for AndroidAssetManager {
     fn default() -> Self {
-        Self {
-            a_asset_manager: std::ptr::null_mut(),
-        }
+        Self(std::ptr::null_mut())
     }
 }
 
@@ -31,9 +27,7 @@ impl Plugin for AndroidAssetIoPlugin {
             .remove_non_send_resource::<AndroidAssetManager>()
             .unwrap();
         let asset_manager = unsafe {
-            AssetManager::from_ptr(
-                std::ptr::NonNull::new(android_asset_manager.a_asset_manager).unwrap(),
-            )
+            AssetManager::from_ptr(std::ptr::NonNull::new(android_asset_manager.0).unwrap())
         };
         // create the custom AndroidAssetIo instance
         let asset_io = AndroidAssetIo::new("assets".to_string(), asset_manager);
