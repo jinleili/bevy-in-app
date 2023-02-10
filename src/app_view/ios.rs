@@ -37,14 +37,6 @@ impl AppView {
         Self { view_obj }
     }
 
-    pub fn inner_size(&self) -> (u32, u32) {
-        let logical_res = self.logical_resolution();
-        (
-            (logical_res.0 * self.scale_factor) as u32,
-            (logical_res.1 * self.scale_factor) as u32,
-        )
-    }
-
     pub fn logical_resolution(&self) -> (f32, f32) {
         let s: CGRect = unsafe { msg_send![self.view, frame] };
         (s.size.width as f32, s.size.height as f32)

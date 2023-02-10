@@ -1,6 +1,14 @@
 use bevy::prelude::*;
 
 #[cfg(any(target_os = "android", target_os = "ios"))]
+use bevy::ecs::{
+    entity::Entity,
+    system::{Commands, Query, SystemState},
+};
+#[cfg(any(target_os = "android", target_os = "ios"))]
+use bevy::input::{keyboard::KeyboardInput, ButtonState};
+
+#[cfg(any(target_os = "android", target_os = "ios"))]
 mod app_view;
 
 #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -11,24 +19,11 @@ pub use ffi::*;
 #[cfg(target_os = "android")]
 mod android_asset_io;
 
-#[derive(Resource)]
-pub struct AppWindowSize {
-    pub size: Vec2,
-}
-
-impl std::ops::Deref for AppWindowSize {
-    type Target = Vec2;
-    fn deref(&self) -> &Self::Target {
-        &self.size
-    }
-}
-
 mod breakout;
 #[allow(unused_variables)]
 pub fn create_breakout_app(
     #[cfg(target_os = "android")] android_asset_manager: android_asset_io::AndroidAssetManager,
 ) -> App {
-    use bevy::time::FixedTimestep;
     #[allow(unused_imports)]
     use bevy::winit::WinitPlugin;
     use breakout::*;
@@ -40,14 +35,9 @@ pub fn create_breakout_app(
 
     #[cfg(any(target_os = "android", target_os = "ios"))]
     {
-        default_plugins = default_plugins.disable::<WinitPlugin>().set(WindowPlugin {
-            window: WindowDescriptor {
-                resizable: false,
-                mode: WindowMode::BorderlessFullscreen,
-                ..default()
-            },
-            ..default()
-        });
+        default_plugins = default_plugins
+            .disable::<WinitPlugin>()
+            .set(WindowPlugin::default());
     }
 
     #[cfg(target_os = "android")]
@@ -85,22 +75,30 @@ pub fn create_breakout_app(
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_startup_system(setup)
         .add_event::<CollisionEvent>()
-        .add_system_set(
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-                .with_system(check_for_collisions)
-                .with_system(move_paddle.before(check_for_collisions))
-                .with_system(apply_velocity.before(check_for_collisions))
-                .with_system(play_collision_sound.after(check_for_collisions)),
+        .add_systems_to_schedule(
+            CoreSchedule::FixedUpdate,
+            (
+                check_for_collisions,
+                apply_velocity.before(check_for_collisions),
+                move_paddle
+                    .before(check_for_collisions)
+                    .after(apply_velocity),
+                play_collision_sound.after(check_for_collisions),
+            ),
         )
+        .insert_resource(FixedTime::new_from_secs(TIME_STEP))
         .add_system(update_scoreboard);
+
+    // In this scenario, need to call the setup() of the plugins that have been registered
+    // in the App manually.
+    // https://github.com/bevyengine/bevy/issues/7576
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    bevy_app.setup();
 
     bevy_app
 }
 
-use bevy::input::{keyboard::KeyboardInput, ButtonState};
-
-#[allow(unused)]
+#[cfg(any(target_os = "android", target_os = "ios"))]
 pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState) {
     let input = KeyboardInput {
         scan_code: if key_code == KeyCode::Left { 123 } else { 124 },
@@ -110,10 +108,15 @@ pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState)
     app.world.cell().send_event(input);
 }
 
-#[allow(unused)]
+#[cfg(any(target_os = "android", target_os = "ios"))]
 pub(crate) fn close_bevy_window(mut app: Box<App>) {
-    let mut windows = app.world.resource_mut::<Windows>();
-    if let Some(window) = windows.get_focused_mut() {
-        window.close();
+    let mut windows_state: SystemState<(Commands, Query<(Entity, &mut Window)>)> =
+        SystemState::from_world(&mut app.world);
+    let (mut commands, windows) = windows_state.get_mut(&mut app.world);
+    for (window, _focus) in windows.iter() {
+        commands.entity(window).despawn();
     }
+    
+    windows_state.apply(&mut app.world);
+    app.update();
 }

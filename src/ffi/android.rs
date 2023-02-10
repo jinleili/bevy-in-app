@@ -12,6 +12,15 @@ use jni_fn::jni_fn;
 extern "C" {}
 
 #[no_mangle]
+pub fn android_main(_android_app: bevy::winit::AndroidApp) {
+    // This maybe a bevy issue:
+    // `android_main` empty function is currently required, otherwise, a panic will occur.
+    //
+    // java.lang.UnsatisfiedLinkError: dlopen failed: cannot locate symbol "android_main"
+    // referenced by "/data/app/~~hebB-d3x4YdYjuFlqiJT3w==/name.jinleili.bevy.debug-j2uCKW7h8U7-_YzEOO48Dg==/base.apk!/lib/arm64-v8a/libbevy_in_app.so"...
+}
+
+#[no_mangle]
 #[jni_fn("name.jinleili.bevy.RustBridge")]
 pub fn init_ndk_context(env: JNIEnv, _: jobject, context: jobject) {
     log_panics::init();
@@ -39,7 +48,7 @@ pub fn create_bevy_app(
     let mut bevy_app = crate::create_breakout_app(AndroidAssetManager(a_asset_manager));
     bevy_app.insert_non_send_resource(android_obj);
 
-    crate::app_view::app_runner(&mut bevy_app);
+    crate::app_view::create_bevy_window(&mut bevy_app);
 
     info!("Bevy App created!");
     Box::into_raw(Box::new(bevy_app)) as jlong

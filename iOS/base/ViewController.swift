@@ -61,6 +61,7 @@ class ViewController: UIViewController {
             displayLink.isPaused = true
             release_bevy_app(bevy)
         }
+        
         createBevyApp()
         displayLink.isPaused = false
     }

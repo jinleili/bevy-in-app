@@ -1,4 +1,4 @@
-use crate::app_view::{app_runner, IOSViewObj};
+use crate::app_view::{create_bevy_window, IOSViewObj};
 use bevy::input::{
     touch::{TouchInput, TouchPhase},
     ButtonState,
@@ -11,7 +11,7 @@ pub fn create_bevy_app(view: *mut objc::runtime::Object, scale_factor: f32) -> *
     let ios_obj = IOSViewObj { view, scale_factor };
     bevy_app.insert_non_send_resource(ios_obj);
 
-    app_runner(&mut bevy_app);
+    create_bevy_window(&mut bevy_app);
 
     info!("Bevy App created!");
     let box_obj = Box::new(bevy_app);
@@ -28,7 +28,6 @@ pub fn enter_frame(obj: *mut libc::c_void) {
 
 #[no_mangle]
 pub fn touch_started(obj: *mut libc::c_void, x: f32, y: f32) {
-    // 使用逻辑像素位置
     touched(obj, TouchPhase::Started, Vec2::new(x, y));
 }
 
@@ -59,10 +58,14 @@ fn touched(obj: *mut libc::c_void, phase: TouchPhase, position: Vec2) {
 }
 
 #[no_mangle]
-pub fn gyroscope_motion(_obj: *mut libc::c_void, _x: f32, _y: f32, _z: f32) {}
+pub fn gyroscope_motion(_obj: *mut libc::c_void, _x: f32, _y: f32, _z: f32) {
+    // TODO:
+}
 
 #[no_mangle]
-pub fn accelerometer_motion(_obj: *mut libc::c_void, _x: f32, _y: f32, _z: f32) {}
+pub fn accelerometer_motion(_obj: *mut libc::c_void, _x: f32, _y: f32, _z: f32) {
+    // TODO:
+}
 
 #[no_mangle]
 pub fn device_motion(obj: *mut libc::c_void, x: f32, _y: f32, _z: f32) {
