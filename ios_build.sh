@@ -31,4 +31,4 @@ if [ ! -d "iOS/libs/${LIB_FOLDER}/" ]; then
   mkdir -p "iOS/libs/${LIB_FOLDER}"
 fi
 
-cp target/${TARGET}/debug/libbevy_in_app.a iOS/libs/${LIB_FOLDER}/libbevy_in_app.a
+cp target/${TARGET}/${LIB_FOLDER}/libbevy_in_app.a iOS/libs/${LIB_FOLDER}/libbevy_in_app.a
