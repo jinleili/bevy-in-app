@@ -75,8 +75,7 @@ pub fn create_breakout_app(
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_startup_system(setup)
         .add_event::<CollisionEvent>()
-        .add_systems_to_schedule(
-            CoreSchedule::FixedUpdate,
+        .add_systems(
             (
                 check_for_collisions,
                 apply_velocity.before(check_for_collisions),
@@ -84,7 +83,8 @@ pub fn create_breakout_app(
                     .before(check_for_collisions)
                     .after(apply_velocity),
                 play_collision_sound.after(check_for_collisions),
-            ),
+            )
+                .in_schedule(CoreSchedule::FixedUpdate),
         )
         .insert_resource(FixedTime::new_from_secs(TIME_STEP))
         .add_system(update_scoreboard);
@@ -110,13 +110,18 @@ pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState)
 
 #[cfg(any(target_os = "android", target_os = "ios"))]
 pub(crate) fn close_bevy_window(mut app: Box<App>) {
-    let mut windows_state: SystemState<(Commands, Query<(Entity, &mut Window)>)> =
-        SystemState::from_world(&mut app.world);
-    let (mut commands, windows) = windows_state.get_mut(&mut app.world);
+    use bevy::app::AppExit;
+    let mut windows_state: SystemState<(
+        Commands,
+        Query<(Entity, &mut Window)>,
+        EventWriter<AppExit>,
+    )> = SystemState::from_world(&mut app.world);
+    let (mut commands, windows, mut app_exit_events) = windows_state.get_mut(&mut app.world);
     for (window, _focus) in windows.iter() {
         commands.entity(window).despawn();
     }
-    
+    app_exit_events.send(AppExit);
     windows_state.apply(&mut app.world);
+
     app.update();
 }

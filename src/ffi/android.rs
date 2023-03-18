@@ -13,8 +13,8 @@ extern "C" {}
 
 #[no_mangle]
 pub fn android_main(_android_app: bevy::winit::AndroidApp) {
-    // This maybe a bevy issue:
-    // `android_main` empty function is currently required, otherwise, a panic will occur.
+    // This maybe a bevy issue
+    // `android_main` empty function is currently required, otherwise, a panic will occur:
     //
     // java.lang.UnsatisfiedLinkError: dlopen failed: cannot locate symbol "android_main"
     // referenced by "/data/app/~~hebB-d3x4YdYjuFlqiJT3w==/name.jinleili.bevy.debug-j2uCKW7h8U7-_YzEOO48Dg==/base.apk!/lib/arm64-v8a/libbevy_in_app.so"...
