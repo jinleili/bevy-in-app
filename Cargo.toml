@@ -45,7 +45,7 @@ core-graphics = "*"
 objc = "*"
 
 [target.'cfg(target_os = "android")'.dependencies]
-jni = "0.19"
+jni = "0.21"
 jni_fn = "0.1"
 ndk-sys = "*"
 ndk = "0.7"
