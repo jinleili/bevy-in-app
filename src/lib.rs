@@ -67,15 +67,14 @@ pub fn create_breakout_app(
 
     #[cfg(any(target_os = "android", target_os = "ios"))]
     bevy_app.add_plugin(app_view::AppViewPlugin);
-    #[cfg(not(any(target_os = "android", target_os = "ios")))]
-    bevy_app.add_system(bevy::window::close_on_esc);
 
     bevy_app
         .insert_resource(Scoreboard { score: 0 })
         .insert_resource(ClearColor(BACKGROUND_COLOR))
-        .add_startup_system(setup)
+        .add_systems(Startup, setup)
         .add_event::<CollisionEvent>()
         .add_systems(
+            FixedUpdate,
             (
                 check_for_collisions,
                 apply_velocity.before(check_for_collisions),
@@ -83,11 +82,10 @@ pub fn create_breakout_app(
                     .before(check_for_collisions)
                     .after(apply_velocity),
                 play_collision_sound.after(check_for_collisions),
-            )
-                .in_schedule(CoreSchedule::FixedUpdate),
+            ),
         )
         .insert_resource(FixedTime::new_from_secs(TIME_STEP))
-        .add_system(update_scoreboard);
+        .add_systems(Update, (update_scoreboard, bevy::window::close_on_esc));
 
     // In this scenario, need to call the setup() of the plugins that have been registered
     // in the App manually.

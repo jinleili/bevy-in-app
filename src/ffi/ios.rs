@@ -43,7 +43,7 @@ pub fn touch_ended(obj: *mut libc::c_void, x: f32, y: f32) {
 
 #[no_mangle]
 pub fn touch_cancelled(obj: *mut libc::c_void, x: f32, y: f32) {
-    touched(obj, TouchPhase::Cancelled, Vec2::new(x, y));
+    touched(obj, TouchPhase::Canceled, Vec2::new(x, y));
 }
 
 fn touched(obj: *mut libc::c_void, phase: TouchPhase, position: Vec2) {

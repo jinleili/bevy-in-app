@@ -1,4 +1,4 @@
-use bevy::app::{App, CoreSet, Plugin};
+use bevy::app::{App, Plugin};
 use bevy::ecs::{
     entity::Entity,
     event::EventWriter,
@@ -33,12 +33,12 @@ pub struct AppViewPlugin;
 impl Plugin for AppViewPlugin {
     fn build(&self, app: &mut App) {
         app.init_non_send_resource::<AppViews>().add_systems(
+            bevy::app::Last,
             (
                 changed_window.ambiguous_with(exit_on_all_closed),
                 // Update the state of the window before attempting to despawn to ensure consistent event ordering
                 despawn_window.after(changed_window),
-            )
-                .in_base_set(CoreSet::Last),
+            ),
         );
     }
 }
