@@ -33,6 +33,25 @@ pub fn create_breakout_app(
     #[allow(unused_mut)]
     let mut default_plugins = DefaultPlugins.build();
 
+    // Temporary fix for the crash caused by winit on macOS Sonoma.
+    #[cfg(target_os = "macos")]
+    {
+        default_plugins = default_plugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                resolution: bevy::window::WindowResolution::new(900., 700.)
+                    .with_scale_factor_override(2.0),
+                resize_constraints: WindowResizeConstraints {
+                    min_width: 600.,
+                    min_height: 500.,
+                    max_height: 1200.,
+                    max_width: 1600.,
+                },
+                ..default()
+            }),
+            ..default()
+        });
+    }
+
     #[cfg(any(target_os = "android", target_os = "ios"))]
     {
         default_plugins = default_plugins
@@ -66,7 +85,7 @@ pub fn create_breakout_app(
         .add_plugins(default_plugins);
 
     #[cfg(any(target_os = "android", target_os = "ios"))]
-    bevy_app.add_plugin(app_view::AppViewPlugin);
+    bevy_app.add_plugins(app_view::AppViewPlugin);
 
     bevy_app
         .insert_resource(Scoreboard { score: 0 })
@@ -90,18 +109,32 @@ pub fn create_breakout_app(
     // In this scenario, need to call the setup() of the plugins that have been registered
     // in the App manually.
     // https://github.com/bevyengine/bevy/issues/7576
+    // bevy 0.11 changed: https://github.com/bevyengine/bevy/pull/8336
     #[cfg(any(target_os = "android", target_os = "ios"))]
-    bevy_app.setup();
+    {
+        while !bevy_app.ready() {
+            bevy::tasks::tick_global_task_pools_on_main_thread();
+        }
+        bevy_app.finish();
+        bevy_app.cleanup();
+
+        bevy_app.update();
+    }
 
     bevy_app
 }
 
 #[cfg(any(target_os = "android", target_os = "ios"))]
 pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState) {
+    let mut windows_system_state: SystemState<Query<(Entity, &mut Window)>> =
+        SystemState::from_world(&mut app.world);
+    let windows = windows_system_state.get_mut(&mut app.world);
+    let (entity, _) = windows.get_single().unwrap();
     let input = KeyboardInput {
         scan_code: if key_code == KeyCode::Left { 123 } else { 124 },
         state,
         key_code: Some(key_code),
+        window: entity,
     };
     app.world.cell().send_event(input);
 }

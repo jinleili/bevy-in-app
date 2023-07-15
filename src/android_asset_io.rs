@@ -1,5 +1,5 @@
 use bevy::{
-    asset::{AssetIo, AssetIoError, Metadata},
+    asset::{AssetIo, AssetIoError, ChangeWatcher, Metadata},
     prelude::*,
     utils::BoxedFuture,
 };
@@ -78,7 +78,7 @@ impl AssetIo for AndroidAssetIo {
         Ok(())
     }
 
-    fn watch_for_changes(&self) -> Result<(), AssetIoError> {
+    fn watch_for_changes(&self, _configuration: &ChangeWatcher) -> Result<(), AssetIoError> {
         Ok(())
     }
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Stop subsequent execution when encountering any errors
+set -e
 
 TARGET=${1}
 RELEASE_MODE=${2}

@@ -13,9 +13,9 @@
 		AD4B1FF626EB1B91008A6AEE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AD4B1FF526EB1B91008A6AEE /* Assets.xcassets */; };
 		AD4B1FF926EB1B91008A6AEE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD4B1FF726EB1B91008A6AEE /* LaunchScreen.storyboard */; };
 		AD4B200126EB1D32008A6AEE /* MetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4B200026EB1D31008A6AEE /* MetalView.swift */; };
+		AD6712AF2A6211F300CAA248 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = AD6712AE2A6211F300CAA248 /* assets */; };
 		AD6C6A82295400160079516D /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD6C6A81295400160079516D /* CoreMotion.framework */; };
 		AD6C6A84295401050079516D /* ViewController+CoreMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6C6A83295401050079516D /* ViewController+CoreMotion.swift */; };
-		AD6C6A8A29548E4C0079516D /* assets in Resources */ = {isa = PBXBuildFile; fileRef = AD6C6A8929548E4C0079516D /* assets */; };
 		AD9EA281293B0CAF0079F1B4 /* libs in Resources */ = {isa = PBXBuildFile; fileRef = AD9EA280293B0CAF0079F1B4 /* libs */; };
 		ADC0D0F0295161DA00388970 /* libbevy_in_app.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADC0D0EF295161DA00388970 /* libbevy_in_app.a */; };
 		ADC0D0F2295172CA00388970 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ADC0D0F1295172CA00388970 /* AudioToolbox.framework */; };
@@ -30,9 +30,9 @@
 		AD4B1FF826EB1B91008A6AEE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AD4B1FFA26EB1B91008A6AEE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AD4B200026EB1D31008A6AEE /* MetalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalView.swift; sourceTree = "<group>"; };
+		AD6712AE2A6211F300CAA248 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../assets; sourceTree = "<group>"; };
 		AD6C6A81295400160079516D /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk/System/Library/Frameworks/CoreMotion.framework; sourceTree = DEVELOPER_DIR; };
 		AD6C6A83295401050079516D /* ViewController+CoreMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+CoreMotion.swift"; sourceTree = "<group>"; };
-		AD6C6A8929548E4C0079516D /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../assets; sourceTree = "<group>"; };
 		AD9EA280293B0CAF0079F1B4 /* libs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = libs; sourceTree = "<group>"; };
 		ADA4699026EB27CB008B1C7B /* libbevy_in_app.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libbevy_in_app.h; sourceTree = "<group>"; };
 		ADA4699226EB2F9A008B1C7B /* bevy_in_iOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "bevy_in_iOS-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -72,7 +72,7 @@
 		AD4B1FE026EB1B90008A6AEE = {
 			isa = PBXGroup;
 			children = (
-				AD6C6A8929548E4C0079516D /* assets */,
+				AD6712AE2A6211F300CAA248 /* assets */,
 				AD9EA280293B0CAF0079F1B4 /* libs */,
 				AD0CB7E127A4061E0041811B /* base */,
 				AD4B1FEB26EB1B90008A6AEE /* bevy_in_iOS */,
@@ -165,7 +165,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AD6C6A8A29548E4C0079516D /* assets in Resources */,
+				AD6712AF2A6211F300CAA248 /* assets in Resources */,
 				AD4B1FF926EB1B91008A6AEE /* LaunchScreen.storyboard in Resources */,
 				AD4B1FF626EB1B91008A6AEE /* Assets.xcassets in Resources */,
 				AD9EA281293B0CAF0079F1B4 /* libs in Resources */,
@@ -333,7 +333,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.0;
-				DEVELOPMENT_TEAM = K3H55AGK36;
+				DEVELOPMENT_TEAM = P3HQ9GDFCW;
 				INFOPLIST_FILE = bevy_in_iOS/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.5;
 				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 14.2;
@@ -367,7 +367,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.0;
-				DEVELOPMENT_TEAM = K3H55AGK36;
+				DEVELOPMENT_TEAM = P3HQ9GDFCW;
 				INFOPLIST_FILE = bevy_in_iOS/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.5;
 				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 14.2;
