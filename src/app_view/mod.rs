@@ -22,8 +22,8 @@ impl WindowId {
 
 #[cfg_attr(target_os = "ios", path = "ios.rs")]
 #[cfg_attr(target_os = "android", path = "android.rs")]
-mod app_view;
-pub use app_view::*;
+mod view;
+pub use view::*;
 
 mod app_views;
 use app_views::AppViews;
@@ -43,7 +43,7 @@ impl Plugin for AppViewPlugin {
     }
 }
 
-#[allow(unused)]
+#[allow(unused, clippy::type_complexity)]
 pub fn create_bevy_window(app: &mut App) {
     #[cfg(target_os = "ios")]
     let view_obj = app.world.remove_non_send_resource::<IOSViewObj>().unwrap();
@@ -91,7 +91,7 @@ pub(crate) fn despawn_window(
     mut close_events: EventWriter<WindowClosed>,
     mut app_views: NonSendMut<AppViews>,
 ) {
-    for entity in closed.iter() {
+    for entity in closed.read() {
         info!("Closing window {:?}", entity);
         if !window_entities.contains(entity) {
             app_views.remove_view(entity);

@@ -1,14 +1,18 @@
 use bevy::{
-    asset::{AssetIo, AssetIoError, ChangeWatcher, Metadata},
+    asset::io::{
+        AssetReader, AssetReaderError, AssetSource, AssetSourceId, PathStream, Reader, VecReader,
+    },
     prelude::*,
     utils::BoxedFuture,
 };
 use ndk::asset::AssetManager;
 use std::{
-    convert::TryFrom,
     ffi::CString,
     path::{Path, PathBuf},
 };
+
+/// *mut ndk_sys::AAssetManager 无法实现 send
+pub static ASSET_MANAGER: std::sync::OnceLock<AssetManager> = std::sync::OnceLock::new();
 
 pub struct AndroidAssetManager(pub *mut ndk_sys::AAssetManager);
 
@@ -29,70 +33,90 @@ impl Plugin for AndroidAssetIoPlugin {
         let asset_manager = unsafe {
             AssetManager::from_ptr(std::ptr::NonNull::new(android_asset_manager.0).unwrap())
         };
-        // create the custom AndroidAssetIo instance
-        let asset_io = AndroidAssetIo::new("assets".to_string(), asset_manager);
-
-        // the asset server is constructed and added the resource manager
-        app.insert_resource(AssetServer::new(asset_io));
+        let _ = ASSET_MANAGER.set(asset_manager);
+       
+       // override bevy default asset reader
+       // https://github.com/bevyengine/bevy/pull/9885
+        app.register_asset_source(
+            AssetSourceId::Default,
+            AssetSource::build()
+                .with_reader(|| Box::new(AndroidAssetIo::new("assets".to_string()))),
+        );
     }
 }
 
+#[allow(dead_code)]
 struct AndroidAssetIo {
     root_path: PathBuf,
-    asset_manager: AssetManager,
 }
 
 impl AndroidAssetIo {
-    pub fn new<P: AsRef<Path>>(path: P, asset_manager: AssetManager) -> Self {
+    pub fn new<P: AsRef<Path>>(path: P) -> Self {
         AndroidAssetIo {
             root_path: path.as_ref().to_owned(),
-            asset_manager,
         }
     }
 }
 
-impl AssetIo for AndroidAssetIo {
-    fn load_path<'a>(&'a self, path: &'a Path) -> BoxedFuture<'a, Result<Vec<u8>, AssetIoError>> {
+impl AssetReader for AndroidAssetIo {
+    fn read<'a>(
+        &'a self,
+        path: &'a Path,
+    ) -> BoxedFuture<'a, Result<Box<Reader<'a>>, AssetReaderError>> {
         Box::pin(async move {
-            let mut opened_asset = self
-                .asset_manager
+            let mut opened_asset = ASSET_MANAGER
+                .get()
+                .unwrap()
                 .open(&CString::new(path.to_str().unwrap()).unwrap())
-                .ok_or(AssetIoError::NotFound(path.to_path_buf()))?;
+                .ok_or(AssetReaderError::NotFound(path.to_path_buf()))?;
             let bytes = opened_asset.get_buffer()?;
-            Ok(bytes.to_vec())
+            let reader: Box<Reader> = Box::new(VecReader::new(bytes.to_vec()));
+            Ok(reader)
         })
     }
 
-    fn read_directory(
-        &self,
-        _path: &Path,
-    ) -> Result<Box<dyn Iterator<Item = PathBuf>>, AssetIoError> {
-        Ok(Box::new(std::iter::empty::<PathBuf>()))
+    fn read_directory<'a>(
+        &'a self,
+        path: &'a Path,
+    ) -> BoxedFuture<'a, Result<Box<PathStream>, AssetReaderError>> {
+        error!("Reading directories is not supported with the AndroidAssetReader");
+        Box::pin(async move { Err(AssetReaderError::NotFound(path.to_path_buf())) })
     }
 
-    fn watch_path_for_changes(
-        &self,
-        _to_watch: &Path,
-        _to_reload: Option<PathBuf>,
-    ) -> Result<(), AssetIoError> {
-        Ok(())
+    fn read_meta<'a>(
+        &'a self,
+        path: &'a Path,
+    ) -> BoxedFuture<'a, Result<Box<Reader<'a>>, AssetReaderError>> {
+        Box::pin(async move {
+            let meta_path = get_meta_path(path);
+            let mut opened_asset = ASSET_MANAGER
+                .get()
+                .unwrap()
+                .open(&CString::new(meta_path.to_str().unwrap()).unwrap())
+                .ok_or(AssetReaderError::NotFound(meta_path))?;
+            let bytes = opened_asset.get_buffer()?;
+            let reader: Box<Reader> = Box::new(VecReader::new(bytes.to_vec()));
+            Ok(reader)
+        })
     }
 
-    fn watch_for_changes(&self, _configuration: &ChangeWatcher) -> Result<(), AssetIoError> {
-        Ok(())
+    fn is_directory<'a>(
+        &'a self,
+        _path: &'a Path,
+    ) -> BoxedFuture<'a, std::result::Result<bool, AssetReaderError>> {
+        error!("Reading directories is not supported with the AndroidAssetReader");
+        Box::pin(async move { Ok(false) })
     }
+}
 
-    fn get_metadata(&self, path: &Path) -> Result<Metadata, AssetIoError> {
-        let full_path = self.root_path.join(path);
-        full_path
-            .metadata()
-            .and_then(Metadata::try_from)
-            .map_err(|e| {
-                if e.kind() == std::io::ErrorKind::NotFound {
-                    AssetIoError::NotFound(full_path)
-                } else {
-                    e.into()
-                }
-            })
-    }
+/// Appends `.meta` to the given path.
+pub(crate) fn get_meta_path(path: &Path) -> PathBuf {
+    let mut meta_path = path.to_path_buf();
+    let mut extension = path
+        .extension()
+        .expect("asset paths must have extensions")
+        .to_os_string();
+    extension.push(".meta");
+    meta_path.set_extension(extension);
+    meta_path
 }

@@ -1,12 +1,12 @@
-use crate::{
-    android_asset_io::AndroidAssetManager,
-    app_view::{AndroidViewObj, AppView},
-};
+use crate::android_asset_io::AndroidAssetManager;
+use crate::app_view::{AndroidViewObj, AppView};
+use android_logger::Config;
 use bevy::input::ButtonState;
 use bevy::prelude::*;
 use jni::sys::{jfloat, jlong, jobject};
 use jni::JNIEnv;
 use jni_fn::jni_fn;
+use log::LevelFilter;
 
 #[link(name = "c++_shared")]
 extern "C" {}
@@ -24,6 +24,7 @@ pub fn android_main(_android_app: bevy::winit::AndroidApp) {
 #[jni_fn("name.jinleili.bevy.RustBridge")]
 pub fn init_ndk_context(env: JNIEnv, _: jobject, context: jobject) {
     log_panics::init();
+    android_logger::init_once(Config::default().with_max_level(LevelFilter::Info));
     let java_vm = env.get_java_vm().unwrap();
     unsafe {
         ndk_context::initialize_android_context(java_vm.get_java_vm_pointer() as _, context as _);
@@ -47,10 +48,9 @@ pub fn create_bevy_app(
 
     let mut bevy_app = crate::create_breakout_app(AndroidAssetManager(a_asset_manager));
     bevy_app.insert_non_send_resource(android_obj);
-
     crate::app_view::create_bevy_window(&mut bevy_app);
-
-    info!("Bevy App created!");
+    log::info!("Bevy App created!");
+    
     Box::into_raw(Box::new(bevy_app)) as jlong
 }
 

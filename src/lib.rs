@@ -3,6 +3,7 @@ use bevy::prelude::*;
 #[cfg(any(target_os = "android", target_os = "ios"))]
 use bevy::ecs::{
     entity::Entity,
+    schedule::IntoSystemConfigs,
     system::{Commands, Query, SystemState},
 };
 #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -63,13 +64,17 @@ pub fn create_breakout_app(
     {
         bevy_app.insert_non_send_resource(android_asset_manager);
 
-        use bevy::render::{settings::WgpuSettings, RenderPlugin};
+        use bevy::render::{
+            settings::{RenderCreation, WgpuSettings},
+            RenderPlugin,
+        };
         default_plugins = default_plugins.set(RenderPlugin {
-            wgpu_settings: WgpuSettings {
+            render_creation: RenderCreation::Automatic(WgpuSettings {
                 backends: Some(wgpu::Backends::VULKAN),
                 ..default()
-            },
+            }),
         });
+
         // the custom asset io plugin must be inserted in-between the
         // `CorePlugin' and `AssetPlugin`. It needs to be after the
         // CorePlugin, so that the IO task pool has already been constructed.
@@ -77,6 +82,11 @@ pub fn create_breakout_app(
         // doesn't create another instance of an asset server. In general,
         // the AssetPlugin should still run so that other aspects of the
         // asset system are initialized correctly.
+        //
+        // 2023/11/04, Bevy v0.12:
+        // In the Android, Bevy's AssetPlugin relies on winit, which we are not using.
+        // If a custom AssetPlugin plugin is not provided,  it will crash at runtime:
+        // thread '<unnamed>' panicked at 'Bevy must be setup with the #[bevy_main] macro on Android'
         default_plugins = default_plugins
             .add_before::<bevy::asset::AssetPlugin, _>(android_asset_io::AndroidAssetIoPlugin);
     }
@@ -95,15 +105,14 @@ pub fn create_breakout_app(
         .add_systems(
             FixedUpdate,
             (
+                apply_velocity,
+                move_paddle,
                 check_for_collisions,
-                apply_velocity.before(check_for_collisions),
-                move_paddle
-                    .before(check_for_collisions)
-                    .after(apply_velocity),
-                play_collision_sound.after(check_for_collisions),
-            ),
+                // #[cfg(any(not(target_os = "android")))]
+                play_collision_sound,
+            )
+                .chain(),
         )
-        .insert_resource(FixedTime::new_from_secs(TIME_STEP))
         .add_systems(Update, (update_scoreboard, bevy::window::close_on_esc));
 
     // In this scenario, need to call the setup() of the plugins that have been registered
@@ -112,12 +121,12 @@ pub fn create_breakout_app(
     // bevy 0.11 changed: https://github.com/bevyengine/bevy/pull/8336
     #[cfg(any(target_os = "android", target_os = "ios"))]
     {
-        while !bevy_app.ready() {
+        use bevy::app::PluginsState;
+        while bevy_app.plugins_state() != PluginsState::Ready {
             bevy::tasks::tick_global_task_pools_on_main_thread();
         }
         bevy_app.finish();
         bevy_app.cleanup();
-
         bevy_app.update();
     }
 
@@ -140,6 +149,7 @@ pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState)
 }
 
 #[cfg(any(target_os = "android", target_os = "ios"))]
+#[allow(clippy::type_complexity)]
 pub(crate) fn close_bevy_window(mut app: Box<App>) {
     use bevy::app::AppExit;
     let mut windows_state: SystemState<(
