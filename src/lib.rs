@@ -49,6 +49,8 @@ pub fn create_breakout_app(
                 },
                 ..default()
             }),
+            #[cfg(target_os = "android")]
+            close_when_requested: false,
             ..default()
         });
     }
@@ -138,14 +140,15 @@ pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState)
     let mut windows_system_state: SystemState<Query<(Entity, &mut Window)>> =
         SystemState::from_world(&mut app.world);
     let windows = windows_system_state.get_mut(&mut app.world);
-    let (entity, _) = windows.get_single().unwrap();
-    let input = KeyboardInput {
-        scan_code: if key_code == KeyCode::Left { 123 } else { 124 },
-        state,
-        key_code: Some(key_code),
-        window: entity,
-    };
-    app.world.cell().send_event(input);
+    if let Ok((entity, _)) = windows.get_single() {
+        let input = KeyboardInput {
+            scan_code: if key_code == KeyCode::Left { 123 } else { 124 },
+            state,
+            key_code: Some(key_code),
+            window: entity,
+        };
+        app.world.cell().send_event(input);
+    }
 }
 
 #[cfg(any(target_os = "android", target_os = "ios"))]

@@ -12,7 +12,7 @@ crate-type = ["rlib", "staticlib", "cdylib"]
 libc = "*"
 raw-window-handle = "0.5"
 wgpu = "0.17"
-bevy = { version = "0.12", features = [
+bevy = { version = "0.12.1", features = [
     "bevy_audio",
     "bevy_asset",
     "bevy_sprite",

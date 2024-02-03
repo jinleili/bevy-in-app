@@ -50,7 +50,7 @@ pub fn create_bevy_app(
     bevy_app.insert_non_send_resource(android_obj);
     crate::app_view::create_bevy_window(&mut bevy_app);
     log::info!("Bevy App created!");
-    
+
     Box::into_raw(Box::new(bevy_app)) as jlong
 }
 

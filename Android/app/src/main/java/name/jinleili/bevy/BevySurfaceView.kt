@@ -10,6 +10,7 @@ import android.view.SurfaceView
 class BevySurfaceView : SurfaceView, SurfaceHolder.Callback2 {
     private var rustBrige = RustBridge()
     private var bevy_app: Long = Long.MAX_VALUE
+    private var ndk_inited = false
     private var idx: Int = 0
     private var sensorManager: SensorManager? = null
     private var mSensor: Sensor? = null
@@ -39,11 +40,16 @@ class BevySurfaceView : SurfaceView, SurfaceHolder.Callback2 {
     // 绘制表面被创建后，创建/重新创建 Bevy App
     override fun surfaceCreated(holder: SurfaceHolder) {
         holder.let { h ->
-            rustBrige.init_ndk_context(this.context)
+            if (!ndk_inited) {
+                ndk_inited = true
+                rustBrige.init_ndk_context(this.context)
+            }
 
-            // Get the screen's density scale
-            val scaleFactor: Float = resources.displayMetrics.density
-            bevy_app = rustBrige.create_bevy_app(this.context.assets, h.surface, scaleFactor)
+            if (bevy_app == Long.MAX_VALUE) {
+                // Get the screen's density scale
+                val scaleFactor: Float = resources.displayMetrics.density
+                bevy_app = rustBrige.create_bevy_app(this.context.assets, h.surface, scaleFactor)
+            }
 
             // SurfaceView 默认不会自动开始绘制，setWillNotDraw(false) 用于通知 App 已经准备好开始绘制了。
             setWillNotDraw(false)
@@ -64,7 +70,7 @@ class BevySurfaceView : SurfaceView, SurfaceHolder.Callback2 {
         }
     }
 
-    // 绘制表面被销毁后，也销毁 Bevy App
+    // 绘制表面被销毁后，也销毁 Bevy 中的 Android window
     override fun surfaceDestroyed(holder: SurfaceHolder) {
         if (bevy_app != Long.MAX_VALUE) {
             rustBrige.release_bevy_app(bevy_app)
