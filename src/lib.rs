@@ -3,11 +3,13 @@ use bevy::prelude::*;
 #[cfg(any(target_os = "android", target_os = "ios"))]
 use bevy::ecs::{
     entity::Entity,
-    schedule::IntoSystemConfigs,
     system::{Commands, Query, SystemState},
 };
 #[cfg(any(target_os = "android", target_os = "ios"))]
-use bevy::input::{keyboard::KeyboardInput, ButtonState};
+use bevy::input::{
+    keyboard::{Key, KeyboardInput},
+    ButtonState,
+};
 
 #[cfg(any(target_os = "android", target_os = "ios"))]
 mod app_view;
@@ -21,39 +23,20 @@ pub use ffi::*;
 mod android_asset_io;
 
 mod breakout;
+// mod lighting;
+mod stepping;
+
 #[allow(unused_variables)]
 pub fn create_breakout_app(
     #[cfg(target_os = "android")] android_asset_manager: android_asset_io::AndroidAssetManager,
 ) -> App {
     #[allow(unused_imports)]
     use bevy::winit::WinitPlugin;
-    use breakout::*;
 
     let mut bevy_app = App::new();
 
     #[allow(unused_mut)]
     let mut default_plugins = DefaultPlugins.build();
-
-    // Temporary fix for the crash caused by winit on macOS Sonoma.
-    #[cfg(target_os = "macos")]
-    {
-        default_plugins = default_plugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                resolution: bevy::window::WindowResolution::new(900., 700.)
-                    .with_scale_factor_override(2.0),
-                resize_constraints: WindowResizeConstraints {
-                    min_width: 600.,
-                    min_height: 500.,
-                    max_height: 1200.,
-                    max_width: 1600.,
-                },
-                ..default()
-            }),
-            #[cfg(target_os = "android")]
-            close_when_requested: false,
-            ..default()
-        });
-    }
 
     #[cfg(any(target_os = "android", target_os = "ios"))]
     {
@@ -75,6 +58,7 @@ pub fn create_breakout_app(
                 backends: Some(wgpu::Backends::VULKAN),
                 ..default()
             }),
+            ..default()
         });
 
         // the custom asset io plugin must be inserted in-between the
@@ -93,29 +77,14 @@ pub fn create_breakout_app(
             .add_before::<bevy::asset::AssetPlugin, _>(android_asset_io::AndroidAssetIoPlugin);
     }
     bevy_app
-        .insert_resource(ClearColor(Color::rgb(0.8, 0.4, 0.6)))
+        .insert_resource(ClearColor(Color::srgb(0.8, 0.4, 0.6)))
         .add_plugins(default_plugins);
 
     #[cfg(any(target_os = "android", target_os = "ios"))]
     bevy_app.add_plugins(app_view::AppViewPlugin);
 
-    bevy_app
-        .insert_resource(Scoreboard { score: 0 })
-        .insert_resource(ClearColor(BACKGROUND_COLOR))
-        .add_systems(Startup, setup)
-        .add_event::<CollisionEvent>()
-        .add_systems(
-            FixedUpdate,
-            (
-                apply_velocity,
-                move_paddle,
-                check_for_collisions,
-                // #[cfg(any(not(target_os = "android")))]
-                play_collision_sound,
-            )
-                .chain(),
-        )
-        .add_systems(Update, (update_scoreboard, bevy::window::close_on_esc));
+    bevy_app.add_plugins(breakout::BreakoutGamePlugin);
+    // bevy_app.add_plugins(lighting::LightingDemoPlugin);
 
     // In this scenario, need to call the setup() of the plugins that have been registered
     // in the App manually.
@@ -124,8 +93,9 @@ pub fn create_breakout_app(
     #[cfg(any(target_os = "android", target_os = "ios"))]
     {
         use bevy::app::PluginsState;
-        while bevy_app.plugins_state() != PluginsState::Ready {
-            bevy::tasks::tick_global_task_pools_on_main_thread();
+        while bevy_app.plugins_state() == PluginsState::Adding {
+            #[cfg(not(target_arch = "wasm32"))]
+            bevy_tasks::tick_global_task_pools_on_main_thread();
         }
         bevy_app.finish();
         bevy_app.cleanup();
@@ -138,34 +108,37 @@ pub fn create_breakout_app(
 #[cfg(any(target_os = "android", target_os = "ios"))]
 pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState) {
     let mut windows_system_state: SystemState<Query<(Entity, &mut Window)>> =
-        SystemState::from_world(&mut app.world);
-    let windows = windows_system_state.get_mut(&mut app.world);
+        SystemState::from_world(app.world_mut());
+    let windows = windows_system_state.get_mut(app.world_mut());
     if let Ok((entity, _)) = windows.get_single() {
         let input = KeyboardInput {
-            scan_code: if key_code == KeyCode::Left { 123 } else { 124 },
+            logical_key: if key_code == KeyCode::ArrowLeft {
+                Key::ArrowLeft
+            } else {
+                Key::ArrowRight
+            },
             state,
-            key_code: Some(key_code),
+            key_code: key_code,
             window: entity,
         };
-        app.world.cell().send_event(input);
+        app.world_mut().send_event(input);
     }
 }
 
 #[cfg(any(target_os = "android", target_os = "ios"))]
 #[allow(clippy::type_complexity)]
 pub(crate) fn close_bevy_window(mut app: Box<App>) {
-    use bevy::app::AppExit;
     let mut windows_state: SystemState<(
         Commands,
         Query<(Entity, &mut Window)>,
         EventWriter<AppExit>,
-    )> = SystemState::from_world(&mut app.world);
-    let (mut commands, windows, mut app_exit_events) = windows_state.get_mut(&mut app.world);
+    )> = SystemState::from_world(app.world_mut());
+    let (mut commands, windows, mut app_exit_events) = windows_state.get_mut(app.world_mut());
     for (window, _focus) in windows.iter() {
         commands.entity(window).despawn();
     }
-    app_exit_events.send(AppExit);
-    windows_state.apply(&mut app.world);
+    app_exit_events.send(AppExit::Success);
+    windows_state.apply(app.world_mut());
 
     app.update();
 }

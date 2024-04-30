@@ -1,8 +1,8 @@
 use core_graphics::geometry::CGRect;
 use objc::{runtime::Object, *};
 use raw_window_handle::{
-    HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, UiKitDisplayHandle,
-    UiKitWindowHandle,
+    DisplayHandle, HandleError, HasDisplayHandle, HasWindowHandle, RawDisplayHandle,
+    RawWindowHandle, UiKitDisplayHandle, UiKitWindowHandle, WindowHandle,
 };
 
 #[derive(Debug, Copy, Clone)]
@@ -43,16 +43,23 @@ impl AppView {
     }
 }
 
-unsafe impl HasRawWindowHandle for AppView {
-    fn raw_window_handle(&self) -> RawWindowHandle {
-        let mut handle = UiKitWindowHandle::empty();
-        handle.ui_view = self.view as _;
-        RawWindowHandle::UiKit(handle)
+impl HasWindowHandle for AppView {
+    fn window_handle(&self) -> Result<WindowHandle, HandleError> {
+        Ok(unsafe {
+            WindowHandle::borrow_raw(RawWindowHandle::UiKit(UiKitWindowHandle::new({
+                let ui_view = self.view as _;
+                std::ptr::NonNull::new(ui_view).unwrap()
+            })))
+        })
     }
 }
 
-unsafe impl HasRawDisplayHandle for AppView {
-    fn raw_display_handle(&self) -> RawDisplayHandle {
-        RawDisplayHandle::UiKit(UiKitDisplayHandle::empty())
+impl HasDisplayHandle for AppView {
+    fn display_handle(&self) -> Result<DisplayHandle, HandleError> {
+        Ok(
+            unsafe {
+                DisplayHandle::borrow_raw(RawDisplayHandle::UiKit(UiKitDisplayHandle::new()))
+            },
+        )
     }
 }

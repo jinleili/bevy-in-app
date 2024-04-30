@@ -1,5 +1,5 @@
 use crate::android_asset_io::AndroidAssetManager;
-use crate::app_view::{AndroidViewObj, AppView};
+use crate::app_view::{AndroidViewObj, AppView, NativeWindow};
 use android_logger::Config;
 use bevy::input::ButtonState;
 use bevy::prelude::*;
@@ -12,7 +12,7 @@ use log::LevelFilter;
 extern "C" {}
 
 #[no_mangle]
-pub fn android_main(_android_app: bevy::winit::AndroidApp) {
+pub fn android_main(_android_app: bevy::winit::android_activity::AndroidApp) {
     // This maybe a bevy issue
     // `android_main` empty function is currently required, otherwise, a panic will occur:
     //
@@ -42,7 +42,7 @@ pub fn create_bevy_app(
 ) -> jlong {
     let a_asset_manager = unsafe { ndk_sys::AAssetManager_fromJava(env as _, asset_manager) };
     let android_obj = AndroidViewObj {
-        native_window: AppView::get_native_window(env, surface),
+        native_window: NativeWindow::new(env, surface),
         scale_factor: scale_factor as _,
     };
 
@@ -67,14 +67,14 @@ pub fn device_motion(_env: *mut JNIEnv, _: jobject, obj: jlong, x: jfloat, _y: j
     let app = unsafe { &mut *(obj as *mut App) };
     let x: f32 = x as _;
     if x < -0.2 {
-        crate::change_input(app, KeyCode::Left, ButtonState::Released);
-        crate::change_input(app, KeyCode::Right, ButtonState::Pressed);
+        crate::change_input(app, KeyCode::ArrowLeft, ButtonState::Released);
+        crate::change_input(app, KeyCode::ArrowRight, ButtonState::Pressed);
     } else if x > 0.2 {
-        crate::change_input(app, KeyCode::Right, ButtonState::Released);
-        crate::change_input(app, KeyCode::Left, ButtonState::Pressed);
+        crate::change_input(app, KeyCode::ArrowRight, ButtonState::Released);
+        crate::change_input(app, KeyCode::ArrowLeft, ButtonState::Pressed);
     } else {
-        crate::change_input(app, KeyCode::Left, ButtonState::Released);
-        crate::change_input(app, KeyCode::Right, ButtonState::Released);
+        crate::change_input(app, KeyCode::ArrowLeft, ButtonState::Released);
+        crate::change_input(app, KeyCode::ArrowRight, ButtonState::Released);
     }
 }
 
