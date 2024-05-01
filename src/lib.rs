@@ -22,8 +22,9 @@ pub use ffi::*;
 #[cfg(target_os = "android")]
 mod android_asset_io;
 
-mod breakout;
-// mod lighting;
+mod breakout_game;
+mod lighting_demo;
+mod shapes_demo;
 mod stepping;
 
 #[allow(unused_variables)]
@@ -83,8 +84,9 @@ pub fn create_breakout_app(
     #[cfg(any(target_os = "android", target_os = "ios"))]
     bevy_app.add_plugins(app_view::AppViewPlugin);
 
-    bevy_app.add_plugins(breakout::BreakoutGamePlugin);
-    // bevy_app.add_plugins(lighting::LightingDemoPlugin);
+    // bevy_app.add_plugins(breakout_game::BreakoutGamePlugin);
+    bevy_app.add_plugins(lighting_demo::LightingDemoPlugin);
+    // bevy_app.add_plugins(shapes_demo::ShapesDemoPlugin);
 
     // In this scenario, need to call the setup() of the plugins that have been registered
     // in the App manually.
@@ -93,13 +95,9 @@ pub fn create_breakout_app(
     #[cfg(any(target_os = "android", target_os = "ios"))]
     {
         use bevy::app::PluginsState;
-        while bevy_app.plugins_state() == PluginsState::Adding {
-            #[cfg(not(target_arch = "wasm32"))]
-            bevy_tasks::tick_global_task_pools_on_main_thread();
-        }
+        if bevy_app.plugins_state() == PluginsState::Ready {}
         bevy_app.finish();
         bevy_app.cleanup();
-        bevy_app.update();
     }
 
     bevy_app

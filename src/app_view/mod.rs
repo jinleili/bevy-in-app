@@ -48,7 +48,10 @@ impl Plugin for AppViewPlugin {
 #[allow(unused, clippy::type_complexity)]
 pub fn create_bevy_window(app: &mut App) {
     #[cfg(target_os = "ios")]
-    let view_obj = app.world_mut().remove_non_send_resource::<IOSViewObj>().unwrap();
+    let view_obj = app
+        .world_mut()
+        .remove_non_send_resource::<IOSViewObj>()
+        .unwrap();
     #[cfg(target_os = "android")]
     let view_obj = app
         .world_mut()
@@ -76,6 +79,7 @@ pub fn create_bevy_window(app: &mut App) {
             .resolution
             .set_scale_factor(app_view.scale_factor as f32);
         bevy_window.resolution.set(logical_res.0, logical_res.1);
+        info!("bevy_window: {:?}", bevy_window.resolution);
 
         commands.entity(entity).insert(RawHandleWrapper {
             window_handle: app_view.window_handle().unwrap().as_raw(),
@@ -83,7 +87,7 @@ pub fn create_bevy_window(app: &mut App) {
         });
 
         created_window_writer.send(WindowCreated { window: entity });
-        return;
+        break;
     }
     create_window_system_state.apply(app.world_mut());
 }

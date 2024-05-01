@@ -27,16 +27,16 @@ pub struct AndroidAssetIoPlugin;
 impl Plugin for AndroidAssetIoPlugin {
     fn build(&self, app: &mut App) {
         let android_asset_manager = app
-            .world
+            .world_mut()
             .remove_non_send_resource::<AndroidAssetManager>()
             .unwrap();
         let asset_manager = unsafe {
             AssetManager::from_ptr(std::ptr::NonNull::new(android_asset_manager.0).unwrap())
         };
         let _ = ASSET_MANAGER.set(asset_manager);
-       
-       // override bevy default asset reader
-       // https://github.com/bevyengine/bevy/pull/9885
+
+        // override bevy default asset reader
+        // https://github.com/bevyengine/bevy/pull/9885
         app.register_asset_source(
             AssetSourceId::Default,
             AssetSource::build()

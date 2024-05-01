@@ -16,7 +16,8 @@ bevy_debug_stepping = ["bevy/bevy_debug_stepping"]
 libc = "*"
 raw-window-handle = "0.6"
 wgpu = "0.19"
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "abbaa3943e427750cb9a36265525a6370ba5f963", features = [
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "f1db525f143ca88a37b26158a43a978d04a8859a", features = [
+    # bevy = { path = "../bevy", features = [
     "bevy_audio",
     "bevy_sprite",
     "bevy_winit",

@@ -1,5 +1,5 @@
 use crate::android_asset_io::AndroidAssetManager;
-use crate::app_view::{AndroidViewObj, AppView, NativeWindow};
+use crate::app_view::{AndroidViewObj, NativeWindow};
 use android_logger::Config;
 use bevy::input::ButtonState;
 use bevy::prelude::*;
