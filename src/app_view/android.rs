@@ -13,21 +13,23 @@ pub struct AndroidViewObj {
     pub scale_factor: f32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct AppView {
-    pub view_obj: AndroidViewObj,
+    pub view_obj: super::SendSyncWrapper<AndroidViewObj>,
 }
 
 impl std::ops::Deref for AppView {
     type Target = AndroidViewObj;
     fn deref(&self) -> &Self::Target {
-        &self.view_obj
+        &self.view_obj.0
     }
 }
 
 impl AppView {
     pub fn new(view_obj: AndroidViewObj) -> Self {
-        Self { view_obj }
+        Self {
+            view_obj: super::SendSyncWrapper(view_obj),
+        }
     }
 
     pub fn logical_resolution(&self) -> (f32, f32) {
@@ -44,13 +46,29 @@ impl AppView {
     fn get_height(&self) -> u32 {
         self.native_window.get_height()
     }
+}
 
-    pub fn window_handle(&self) -> Result<WindowHandle, HandleError> {
-        self.native_window.window_handle()
+impl HasWindowHandle for AppView {
+    fn window_handle(&self) -> Result<WindowHandle, HandleError> {
+        unsafe {
+            let a_native_window = self.native_window.a_native_window.lock().unwrap();
+            let handle = AndroidNdkWindowHandle::new(
+                std::ptr::NonNull::new(*a_native_window as *mut _ as *mut c_void).unwrap(),
+            );
+            Ok(WindowHandle::borrow_raw(RawWindowHandle::AndroidNdk(
+                handle,
+            )))
+        }
     }
+}
 
-    pub fn display_handle(&self) -> Result<DisplayHandle<'_>, HandleError> {
-        self.native_window.display_handle()
+impl HasDisplayHandle for AppView {
+    fn display_handle(&self) -> Result<DisplayHandle<'_>, HandleError> {
+        unsafe {
+            Ok(DisplayHandle::borrow_raw(RawDisplayHandle::Android(
+                AndroidDisplayHandle::new(),
+            )))
+        }
     }
 }
 
@@ -92,30 +110,6 @@ impl Drop for NativeWindow {
     fn drop(&mut self) {
         unsafe {
             ndk_sys::ANativeWindow_release(*self.a_native_window.lock().unwrap());
-        }
-    }
-}
-
-impl HasWindowHandle for NativeWindow {
-    fn window_handle(&self) -> Result<WindowHandle, HandleError> {
-        unsafe {
-            let a_native_window = self.a_native_window.lock().unwrap();
-            let handle = AndroidNdkWindowHandle::new(
-                std::ptr::NonNull::new(*a_native_window as *mut _ as *mut c_void).unwrap(),
-            );
-            Ok(WindowHandle::borrow_raw(RawWindowHandle::AndroidNdk(
-                handle,
-            )))
-        }
-    }
-}
-
-impl HasDisplayHandle for NativeWindow {
-    fn display_handle(&self) -> Result<DisplayHandle<'_>, HandleError> {
-        unsafe {
-            Ok(DisplayHandle::borrow_raw(RawDisplayHandle::Android(
-                AndroidDisplayHandle::new(),
-            )))
         }
     }
 }

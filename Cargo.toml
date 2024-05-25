@@ -1,9 +1,9 @@
 [package]
 name = "bevy-in-app"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["jinleili"]
 edition = "2021"
-rust-version = "1.70"
+rust-version = "1.78"
 
 [lib]
 crate-type = ["rlib", "staticlib", "cdylib"]
@@ -16,7 +16,7 @@ bevy_debug_stepping = ["bevy/bevy_debug_stepping"]
 libc = "*"
 raw-window-handle = "0.6"
 wgpu = "0.19"
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "f1db525f143ca88a37b26158a43a978d04a8859a", features = [
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "ec01c2dc4562adb979cf5497a48b53efa8250901", features = [
     # bevy = { path = "../bevy", features = [
     "bevy_audio",
     "bevy_sprite",
@@ -29,7 +29,7 @@ bevy = { git = "https://github.com/bevyengine/bevy", rev = "f1db525f143ca88a37b2
     "png",
     "bevy_debug_stepping",
 ], default-features = false }
-bevy_tasks = { git = "https://github.com/bevyengine/bevy", rev = "abbaa3943e427750cb9a36265525a6370ba5f963" }
+bevy_tasks = { git = "https://github.com/bevyengine/bevy", rev = "ec01c2dc4562adb979cf5497a48b53efa8250901" }
 uuid = { version = "1.7.0", features = ["v4"] }
 log = "0.4"
 

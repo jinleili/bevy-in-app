@@ -20,21 +20,23 @@ impl Default for IOSViewObj {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct AppView {
-    pub view_obj: IOSViewObj,
+    pub view_obj: super::SendSyncWrapper<IOSViewObj>,
 }
 
 impl std::ops::Deref for AppView {
     type Target = IOSViewObj;
     fn deref(&self) -> &Self::Target {
-        &self.view_obj
+        &self.view_obj.0
     }
 }
 
 impl AppView {
     pub fn new(view_obj: IOSViewObj) -> Self {
-        Self { view_obj }
+        Self {
+            view_obj: super::SendSyncWrapper(view_obj),
+        }
     }
 
     pub fn logical_resolution(&self) -> (f32, f32) {

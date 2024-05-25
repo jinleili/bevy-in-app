@@ -58,3 +58,11 @@ cargo install cargo-so
 # Build
 sh ./android_build.sh --release
 ```
+
+## Compatible Bevy versions
+
+| Bevy version | `bevy-in-app` version     |
+|:-------------|:--------------------------|
+| `0.14 dev`   | `0.3`                     |
+| `0.11`-`0.12`| `0.2`                     |
+| `0.10`       | `0.1`                     |

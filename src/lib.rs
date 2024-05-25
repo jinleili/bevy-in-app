@@ -84,8 +84,8 @@ pub fn create_breakout_app(
     #[cfg(any(target_os = "android", target_os = "ios"))]
     bevy_app.add_plugins(app_view::AppViewPlugin);
 
-    // bevy_app.add_plugins(breakout_game::BreakoutGamePlugin);
-    bevy_app.add_plugins(lighting_demo::LightingDemoPlugin);
+    bevy_app.add_plugins(breakout_game::BreakoutGamePlugin);
+    // bevy_app.add_plugins(lighting_demo::LightingDemoPlugin);
     // bevy_app.add_plugins(shapes_demo::ShapesDemoPlugin);
 
     // In this scenario, need to call the setup() of the plugins that have been registered

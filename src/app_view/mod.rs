@@ -7,11 +7,11 @@ use bevy::ecs::{
     system::{Commands, NonSendMut, Query, SystemState},
 };
 use bevy::log::info;
-use bevy::window::{exit_on_all_closed, RawHandleWrapper, Window, WindowClosed, WindowCreated};
+use bevy::window::{
+    exit_on_all_closed, RawHandleWrapper, Window, WindowClosed, WindowCreated, WindowWrapper,
+};
+use std::ops::Deref;
 use uuid::Uuid;
-
-#[cfg(target_os = "ios")]
-use raw_window_handle::{HasDisplayHandle, HasWindowHandle};
 
 #[derive(Eq, Hash, PartialEq, Debug, Copy, Clone)]
 pub(crate) struct WindowId(Uuid);
@@ -29,6 +29,24 @@ pub use view::*;
 
 mod app_views;
 use app_views::AppViews;
+
+#[derive(Clone, Debug)]
+pub(crate) struct SendSyncWrapper<T>(pub(crate) T);
+
+unsafe impl<T> Send for SendSyncWrapper<T> {}
+unsafe impl<T> Sync for SendSyncWrapper<T> {}
+
+// 封装 AppViewWindow
+#[derive(Debug)]
+pub struct AppViewWindow(pub(crate) WindowWrapper<AppView>);
+
+impl Deref for AppViewWindow {
+    type Target = AppView;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 pub struct AppViewPlugin;
 
@@ -81,10 +99,13 @@ pub fn create_bevy_window(app: &mut App) {
         bevy_window.resolution.set(logical_res.0, logical_res.1);
         info!("bevy_window: {:?}", bevy_window.resolution);
 
-        commands.entity(entity).insert(RawHandleWrapper {
-            window_handle: app_view.window_handle().unwrap().as_raw(),
-            display_handle: app_view.display_handle().unwrap().as_raw(),
-        });
+        // commands.entity(entity).insert(RawHandleWrapper {
+        //     window_handle: app_view.window_handle().unwrap().as_raw(),
+        //     display_handle: app_view.display_handle().unwrap().as_raw(),
+        // });
+        commands
+            .entity(entity)
+            .insert(RawHandleWrapper::new(&app_view.0).unwrap());
 
         created_window_writer.send(WindowCreated { window: entity });
         break;
