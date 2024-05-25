@@ -1,9 +1,12 @@
 use crate::app_view::{create_bevy_window, IOSViewObj};
-use bevy::input::{
-    touch::{TouchInput, TouchPhase},
-    ButtonState,
+use bevy::{
+    ecs::system::SystemState,
+    input::{
+        touch::{TouchInput, TouchPhase},
+        ButtonState,
+    },
+    prelude::*,
 };
-use bevy::prelude::*;
 
 #[no_mangle]
 pub fn create_bevy_app(view: *mut objc::runtime::Object, scale_factor: f32) -> *mut libc::c_void {
@@ -47,14 +50,20 @@ pub fn touch_cancelled(obj: *mut libc::c_void, x: f32, y: f32) {
 }
 
 fn touched(obj: *mut libc::c_void, phase: TouchPhase, position: Vec2) {
+    let app = unsafe { &mut *(obj as *mut App) };
+    let mut windows_system_state: SystemState<Query<(Entity, &Window)>> =
+        SystemState::from_world(app.world_mut());
+    let (entity, _) = windows_system_state.get(app.world_mut()).single();
+
     let touch = TouchInput {
+        window: entity,
         phase,
         position,
         force: None,
         id: 0,
     };
-    let app = unsafe { &mut *(obj as *mut App) };
-    app.world.cell().send_event(touch);
+
+    app.world_mut().send_event(touch);
 }
 
 #[no_mangle]
@@ -71,14 +80,14 @@ pub fn accelerometer_motion(_obj: *mut libc::c_void, _x: f32, _y: f32, _z: f32) 
 pub fn device_motion(obj: *mut libc::c_void, x: f32, _y: f32, _z: f32) {
     let app = unsafe { &mut *(obj as *mut App) };
     if x > 0.005 {
-        crate::change_input(app, KeyCode::Left, ButtonState::Released);
-        crate::change_input(app, KeyCode::Right, ButtonState::Pressed);
+        crate::change_input(app, KeyCode::ArrowLeft, ButtonState::Released);
+        crate::change_input(app, KeyCode::ArrowRight, ButtonState::Pressed);
     } else if x < -0.005 {
-        crate::change_input(app, KeyCode::Right, ButtonState::Released);
-        crate::change_input(app, KeyCode::Left, ButtonState::Pressed);
+        crate::change_input(app, KeyCode::ArrowRight, ButtonState::Released);
+        crate::change_input(app, KeyCode::ArrowLeft, ButtonState::Pressed);
     } else {
-        crate::change_input(app, KeyCode::Left, ButtonState::Released);
-        crate::change_input(app, KeyCode::Right, ButtonState::Released);
+        crate::change_input(app, KeyCode::ArrowLeft, ButtonState::Released);
+        crate::change_input(app, KeyCode::ArrowRight, ButtonState::Released);
     }
 }
 

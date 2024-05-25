@@ -1,8 +1,8 @@
 use core_graphics::geometry::CGRect;
 use objc::{runtime::Object, *};
 use raw_window_handle::{
-    HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle, UiKitDisplayHandle,
-    UiKitWindowHandle,
+    DisplayHandle, HandleError, HasDisplayHandle, HasWindowHandle, RawDisplayHandle,
+    RawWindowHandle, UiKitDisplayHandle, UiKitWindowHandle, WindowHandle,
 };
 
 #[derive(Debug, Copy, Clone)]
@@ -20,21 +20,23 @@ impl Default for IOSViewObj {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct AppView {
-    pub view_obj: IOSViewObj,
+    pub view_obj: super::SendSyncWrapper<IOSViewObj>,
 }
 
 impl std::ops::Deref for AppView {
     type Target = IOSViewObj;
     fn deref(&self) -> &Self::Target {
-        &self.view_obj
+        &self.view_obj.0
     }
 }
 
 impl AppView {
     pub fn new(view_obj: IOSViewObj) -> Self {
-        Self { view_obj }
+        Self {
+            view_obj: super::SendSyncWrapper(view_obj),
+        }
     }
 
     pub fn logical_resolution(&self) -> (f32, f32) {
@@ -43,16 +45,23 @@ impl AppView {
     }
 }
 
-unsafe impl HasRawWindowHandle for AppView {
-    fn raw_window_handle(&self) -> RawWindowHandle {
-        let mut handle = UiKitWindowHandle::empty();
-        handle.ui_view = self.view as _;
-        RawWindowHandle::UiKit(handle)
+impl HasWindowHandle for AppView {
+    fn window_handle(&self) -> Result<WindowHandle, HandleError> {
+        Ok(unsafe {
+            WindowHandle::borrow_raw(RawWindowHandle::UiKit(UiKitWindowHandle::new({
+                let ui_view = self.view as _;
+                std::ptr::NonNull::new(ui_view).unwrap()
+            })))
+        })
     }
 }
 
-unsafe impl HasRawDisplayHandle for AppView {
-    fn raw_display_handle(&self) -> RawDisplayHandle {
-        RawDisplayHandle::UiKit(UiKitDisplayHandle::empty())
+impl HasDisplayHandle for AppView {
+    fn display_handle(&self) -> Result<DisplayHandle, HandleError> {
+        Ok(
+            unsafe {
+                DisplayHandle::borrow_raw(RawDisplayHandle::UiKit(UiKitDisplayHandle::new()))
+            },
+        )
     }
 }
