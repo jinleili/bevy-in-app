@@ -10,6 +10,7 @@ import android.view.SurfaceView
 class BevySurfaceView : SurfaceView, SurfaceHolder.Callback2 {
     private var rustBrige = RustBridge()
     private var bevy_app: Long = Long.MAX_VALUE
+    private var appPreparationCompleted: Int = 0;
     private var ndk_inited = false
     private var idx: Int = 0
     private var sensorManager: SensorManager? = null
@@ -75,6 +76,7 @@ class BevySurfaceView : SurfaceView, SurfaceHolder.Callback2 {
         if (bevy_app != Long.MAX_VALUE) {
             rustBrige.release_bevy_app(bevy_app)
             bevy_app = Long.MAX_VALUE
+            appPreparationCompleted = 0;
         }
     }
 
@@ -91,8 +93,12 @@ class BevySurfaceView : SurfaceView, SurfaceHolder.Callback2 {
         if (bevy_app == Long.MAX_VALUE) {
            return
         }
-        rustBrige.device_motion(bevy_app, sensorValues[0], sensorValues[1], sensorValues[2])
-        rustBrige.enter_frame(bevy_app)
+        if (appPreparationCompleted == 0) {
+            appPreparationCompleted = rustBrige.is_preparation_completed(bevy_app);
+        } else {
+            rustBrige.device_motion(bevy_app, sensorValues[0], sensorValues[1], sensorValues[2])
+            rustBrige.enter_frame(bevy_app)
+        }
         // invalidate() 函数通知通知 App，在下一个 UI 刷新周期重新调用 draw() 函数
         invalidate()
     }

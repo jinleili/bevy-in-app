@@ -10,7 +10,7 @@ use bevy::{
 
 #[no_mangle]
 pub fn create_bevy_app(view: *mut objc::runtime::Object, scale_factor: f32) -> *mut libc::c_void {
-    let mut bevy_app = crate::create_breakout_app();
+    let mut bevy_app = crate::create_bevy_app();
     let ios_obj = IOSViewObj { view, scale_factor };
     bevy_app.insert_non_send_resource(ios_obj);
 

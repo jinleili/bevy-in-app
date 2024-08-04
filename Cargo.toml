@@ -15,8 +15,9 @@ bevy_debug_stepping = ["bevy/bevy_debug_stepping"]
 [dependencies]
 libc = "*"
 raw-window-handle = "0.6"
-wgpu = "0.19"
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "ec01c2dc4562adb979cf5497a48b53efa8250901", features = [
+wgpu = "0.20"
+# bevy = { git = "https://github.com/bevyengine/bevy", rev = "ec1aa48fc", features = [
+bevy = { version = "0.14.1", features = [
     # bevy = { path = "../bevy", features = [
     "bevy_audio",
     "bevy_sprite",
@@ -28,8 +29,8 @@ bevy = { git = "https://github.com/bevyengine/bevy", rev = "ec01c2dc4562adb979cf
     "vorbis",
     "png",
     "bevy_debug_stepping",
-], default-features = false }
-bevy_tasks = { git = "https://github.com/bevyengine/bevy", rev = "ec01c2dc4562adb979cf5497a48b53efa8250901" }
+], default-features = true }
+bevy_tasks = { version = "0.14.1" }
 uuid = { version = "1.7.0", features = ["v4"] }
 log = "0.4"
 
@@ -41,9 +42,8 @@ objc = "*"
 android_logger = "0.13"
 jni = "0.21"
 jni_fn = "0.1"
-# 需要保持与 bevy 一致
-ndk-sys = "0.4.1+23.1.7779620"
-ndk = "0.7.0"
+ndk-sys = "0.6"
+ndk = "0.9.0"
 ndk-context = "*"
 log-panics = "*"
 

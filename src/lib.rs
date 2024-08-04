@@ -18,7 +18,6 @@ mod app_view;
 mod ffi;
 #[cfg(any(target_os = "android", target_os = "ios"))]
 pub use ffi::*;
-
 #[cfg(target_os = "android")]
 mod android_asset_io;
 
@@ -28,7 +27,7 @@ mod shapes_demo;
 mod stepping;
 
 #[allow(unused_variables)]
-pub fn create_breakout_app(
+pub fn create_bevy_app(
     #[cfg(target_os = "android")] android_asset_manager: android_asset_io::AndroidAssetManager,
 ) -> App {
     #[allow(unused_imports)]
@@ -74,8 +73,8 @@ pub fn create_breakout_app(
         // In the Android, Bevy's AssetPlugin relies on winit, which we are not using.
         // If a custom AssetPlugin plugin is not provided,  it will crash at runtime:
         // thread '<unnamed>' panicked at 'Bevy must be setup with the #[bevy_main] macro on Android'
-        default_plugins = default_plugins
-            .add_before::<bevy::asset::AssetPlugin, _>(android_asset_io::AndroidAssetIoPlugin);
+        // default_plugins = default_plugins
+        //     .add_before::<bevy::asset::AssetPlugin, _>(android_asset_io::AndroidAssetIoPlugin);
     }
     bevy_app
         .insert_resource(ClearColor(Color::srgb(0.8, 0.4, 0.6)))
@@ -88,19 +87,22 @@ pub fn create_breakout_app(
     // bevy_app.add_plugins(lighting_demo::LightingDemoPlugin);
     // bevy_app.add_plugins(shapes_demo::ShapesDemoPlugin);
 
+    bevy_app
+}
+
+pub fn is_preparation_completed(app: &mut App) -> u32 {
+    use bevy::app::PluginsState;
     // In this scenario, need to call the setup() of the plugins that have been registered
     // in the App manually.
     // https://github.com/bevyengine/bevy/issues/7576
     // bevy 0.11 changed: https://github.com/bevyengine/bevy/pull/8336
-    #[cfg(any(target_os = "android", target_os = "ios"))]
-    {
-        use bevy::app::PluginsState;
-        if bevy_app.plugins_state() == PluginsState::Ready {}
-        bevy_app.finish();
-        bevy_app.cleanup();
+    // 创建 device/queue 是异步的，不确定创建完成的时机
+    if app.plugins_state() == PluginsState::Ready {
+        app.finish();
+        app.cleanup();
+        return 1;
     }
-
-    bevy_app
+    0
 }
 
 #[cfg(any(target_os = "android", target_os = "ios"))]

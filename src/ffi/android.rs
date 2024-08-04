@@ -46,12 +46,19 @@ pub fn create_bevy_app(
         scale_factor: scale_factor as _,
     };
 
-    let mut bevy_app = crate::create_breakout_app(AndroidAssetManager(a_asset_manager));
+    let mut bevy_app = crate::create_bevy_app(AndroidAssetManager(a_asset_manager));
     bevy_app.insert_non_send_resource(android_obj);
     crate::app_view::create_bevy_window(&mut bevy_app);
     log::info!("Bevy App created!");
 
     Box::into_raw(Box::new(bevy_app)) as jlong
+}
+
+#[no_mangle]
+#[jni_fn("name.jinleili.bevy.RustBridge")]
+pub fn is_preparation_completed(_env: *mut JNIEnv, _: jobject, obj: jlong) -> u32 {
+    let bevy_app = unsafe { &mut *(obj as *mut App) };
+    crate::is_preparation_completed(bevy_app)
 }
 
 #[no_mangle]
