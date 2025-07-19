@@ -1,9 +1,13 @@
 [package]
 name = "bevy-in-app"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["jinleili"]
-edition = "2021"
-rust-version = "1.78"
+edition = "2024"
+rust-version = "1.85"
+
+[workspace.metadata.rustflags]
+# 禁用 unexpected_cfgs 检查，解决 objc crate 的警告
+RUSTFLAGS = "--cfg=unexpected_cfgs"
 
 [lib]
 crate-type = ["rlib", "staticlib", "cdylib"]
@@ -15,35 +19,23 @@ bevy_debug_stepping = ["bevy/bevy_debug_stepping"]
 [dependencies]
 libc = "*"
 raw-window-handle = "0.6"
-wgpu = "0.19"
-bevy = { git = "https://github.com/bevyengine/bevy", rev = "ec01c2dc4562adb979cf5497a48b53efa8250901", features = [
-    # bevy = { path = "../bevy", features = [
-    "bevy_audio",
-    "bevy_sprite",
-    "bevy_winit",
-    "bevy_pbr",
-    "bevy_text",
-    "bevy_ui",
-    "tonemapping_luts",
-    "vorbis",
-    "png",
-    "bevy_debug_stepping",
-], default-features = false }
-bevy_tasks = { git = "https://github.com/bevyengine/bevy", rev = "ec01c2dc4562adb979cf5497a48b53efa8250901" }
-uuid = { version = "1.7.0", features = ["v4"] }
+wgpu = "24"
+bevy = { version = "0.16", default-features = true }
+bevy_platform = { version = "0.16.0" }
+bevy_tasks = { version = "0.16.0" }
+uuid = { version = "1.13", features = ["v4"] }
 log = "0.4"
 
 [target.'cfg(target_os = "ios")'.dependencies]
 core-graphics = "*"
-objc = "*"
+objc = "0.2"
 
 [target.'cfg(target_os = "android")'.dependencies]
 android_logger = "0.13"
 jni = "0.21"
 jni_fn = "0.1"
-# 需要保持与 bevy 一致
-ndk-sys = "0.4.1+23.1.7779620"
-ndk = "0.7.0"
+ndk-sys = "0.6.0+11769913"
+ndk = "0.9.0"
 ndk-context = "*"
 log-panics = "*"
 

@@ -3,7 +3,6 @@ use bevy::{
         AssetReader, AssetReaderError, AssetSource, AssetSourceId, PathStream, Reader, VecReader,
     },
     prelude::*,
-    utils::BoxedFuture,
 };
 use ndk::asset::AssetManager;
 use std::{
@@ -59,53 +58,40 @@ impl AndroidAssetIo {
 }
 
 impl AssetReader for AndroidAssetIo {
-    fn read<'a>(
-        &'a self,
-        path: &'a Path,
-    ) -> BoxedFuture<'a, Result<Box<Reader<'a>>, AssetReaderError>> {
-        Box::pin(async move {
-            let mut opened_asset = ASSET_MANAGER
-                .get()
-                .unwrap()
-                .open(&CString::new(path.to_str().unwrap()).unwrap())
-                .ok_or(AssetReaderError::NotFound(path.to_path_buf()))?;
-            let bytes = opened_asset.get_buffer()?;
-            let reader: Box<Reader> = Box::new(VecReader::new(bytes.to_vec()));
-            Ok(reader)
-        })
+    async fn read<'a>(&'a self, path: &'a Path) -> Result<impl Reader + 'a, AssetReaderError> {
+        let mut opened_asset = ASSET_MANAGER
+            .get()
+            .unwrap()
+            .open(&CString::new(path.to_str().unwrap()).unwrap())
+            .ok_or(AssetReaderError::NotFound(path.to_path_buf()))?;
+        let bytes = opened_asset.buffer()?;
+        let reader = VecReader::new(bytes.to_vec());
+        Ok(reader)
     }
 
-    fn read_directory<'a>(
+    async fn read_directory<'a>(
         &'a self,
         path: &'a Path,
-    ) -> BoxedFuture<'a, Result<Box<PathStream>, AssetReaderError>> {
+    ) -> Result<Box<PathStream>, AssetReaderError> {
         error!("Reading directories is not supported with the AndroidAssetReader");
-        Box::pin(async move { Err(AssetReaderError::NotFound(path.to_path_buf())) })
+        Err(AssetReaderError::NotFound(path.to_path_buf()))
     }
 
-    fn read_meta<'a>(
-        &'a self,
-        path: &'a Path,
-    ) -> BoxedFuture<'a, Result<Box<Reader<'a>>, AssetReaderError>> {
-        Box::pin(async move {
-            let meta_path = get_meta_path(path);
-            let mut opened_asset = ASSET_MANAGER
-                .get()
-                .unwrap()
-                .open(&CString::new(meta_path.to_str().unwrap()).unwrap())
-                .ok_or(AssetReaderError::NotFound(meta_path))?;
-            let bytes = opened_asset.get_buffer()?;
-            let reader: Box<Reader> = Box::new(VecReader::new(bytes.to_vec()));
-            Ok(reader)
-        })
+    async fn read_meta<'a>(&'a self, path: &'a Path) -> Result<impl Reader + 'a, AssetReaderError> {
+        let meta_path = get_meta_path(path);
+        let mut opened_asset = ASSET_MANAGER
+            .get()
+            .unwrap()
+            .open(&CString::new(meta_path.to_str().unwrap()).unwrap())
+            .ok_or(AssetReaderError::NotFound(meta_path))?;
+        let bytes = opened_asset.buffer()?;
+        let reader = VecReader::new(bytes.to_vec());
+        Ok(reader)
     }
 
-    fn is_directory<'a>(
-        &'a self,
-        _path: &'a Path,
-    ) -> BoxedFuture<'a, std::result::Result<bool, AssetReaderError>> {
+    async fn is_directory<'a>(&'a self, _path: &'a Path) -> Result<bool, AssetReaderError> {
         error!("Reading directories is not supported with the AndroidAssetReader");
-        Box::pin(async move { Ok(false) })
+        Ok(false)
     }
 }
 

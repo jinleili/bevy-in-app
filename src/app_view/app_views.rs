@@ -1,6 +1,6 @@
 use super::{AppView, AppViewWindow};
 use bevy::ecs::entity::Entity;
-use bevy::utils::HashMap;
+use bevy_platform::collections::HashMap;
 use bevy::window::WindowWrapper;
 
 #[derive(Debug, Default)]

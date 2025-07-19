@@ -8,7 +8,7 @@ use bevy::ecs::{
 };
 use bevy::log::info;
 use bevy::window::{
-    exit_on_all_closed, RawHandleWrapper, Window, WindowClosed, WindowCreated, WindowWrapper,
+    RawHandleWrapper, Window, WindowClosed, WindowCreated, WindowWrapper, exit_on_all_closed,
 };
 use std::ops::Deref;
 use uuid::Uuid;
@@ -107,7 +107,7 @@ pub fn create_bevy_window(app: &mut App) {
             .entity(entity)
             .insert(RawHandleWrapper::new(&app_view.0).unwrap());
 
-        created_window_writer.send(WindowCreated { window: entity });
+        created_window_writer.write(WindowCreated { window: entity });
         break;
     }
     create_window_system_state.apply(app.world_mut());
@@ -123,7 +123,7 @@ pub(crate) fn despawn_window(
         info!("Closing window {:?}", entity);
         if !window_entities.contains(entity) {
             app_views.remove_view(entity);
-            close_events.send(WindowClosed { window: entity });
+            close_events.write(WindowClosed { window: entity });
         }
     }
 }

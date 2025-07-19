@@ -86,8 +86,9 @@ class BevySurfaceView : SurfaceView, SurfaceHolder.Callback2 {
 //        super.surfaceRedrawNeededAsync(holder, drawingFinished)
 //    }
 
-    override fun draw(canvas: Canvas?) {
-        super.draw(canvas)
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        // 考虑到边界情况，这个条件判断不能省略
         if (bevy_app == Long.MAX_VALUE) {
            return
         }
