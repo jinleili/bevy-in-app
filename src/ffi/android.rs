@@ -3,16 +3,16 @@ use crate::app_view::{AndroidViewObj, NativeWindow};
 use android_logger::Config;
 use bevy::input::ButtonState;
 use bevy::prelude::*;
-use jni::sys::{jfloat, jlong, jobject};
 use jni::JNIEnv;
+use jni::sys::{jfloat, jlong, jobject};
 use jni_fn::jni_fn;
 use log::LevelFilter;
 
 #[link(name = "c++_shared")]
-extern "C" {}
+unsafe extern "C" {}
 
-#[no_mangle]
-pub fn android_main(_android_app: bevy::winit::android_activity::AndroidApp) {
+#[unsafe(no_mangle)]
+pub fn android_main(_android_app: bevy::window::android_activity::AndroidApp) {
     // This maybe a bevy issue
     // `android_main` empty function is currently required, otherwise, a panic will occur:
     //
@@ -20,7 +20,7 @@ pub fn android_main(_android_app: bevy::winit::android_activity::AndroidApp) {
     // referenced by "/data/app/~~hebB-d3x4YdYjuFlqiJT3w==/name.jinleili.bevy.debug-j2uCKW7h8U7-_YzEOO48Dg==/base.apk!/lib/arm64-v8a/libbevy_in_app.so"...
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[jni_fn("name.jinleili.bevy.RustBridge")]
 pub fn init_ndk_context(env: JNIEnv, _: jobject, context: jobject) {
     log_panics::init();
@@ -31,7 +31,7 @@ pub fn init_ndk_context(env: JNIEnv, _: jobject, context: jobject) {
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[jni_fn("name.jinleili.bevy.RustBridge")]
 pub fn create_bevy_app(
     env: *mut JNIEnv,
@@ -54,14 +54,14 @@ pub fn create_bevy_app(
     Box::into_raw(Box::new(bevy_app)) as jlong
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[jni_fn("name.jinleili.bevy.RustBridge")]
 pub fn enter_frame(_env: *mut JNIEnv, _: jobject, obj: jlong) {
     let bevy_app = unsafe { &mut *(obj as *mut App) };
     bevy_app.update();
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[jni_fn("name.jinleili.bevy.RustBridge")]
 pub fn device_motion(_env: *mut JNIEnv, _: jobject, obj: jlong, x: jfloat, _y: jfloat, _z: jfloat) {
     let app = unsafe { &mut *(obj as *mut App) };
@@ -78,7 +78,7 @@ pub fn device_motion(_env: *mut JNIEnv, _: jobject, obj: jlong, x: jfloat, _y: j
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[jni_fn("name.jinleili.bevy.RustBridge")]
 pub fn release_bevy_app(_env: *mut JNIEnv, _: jobject, obj: jlong) {
     let app: Box<App> = unsafe { Box::from_raw(obj as *mut _) };

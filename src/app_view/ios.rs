@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 use core_graphics::geometry::CGRect;
 use objc::{runtime::Object, *};
 use raw_window_handle::{

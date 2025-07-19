@@ -7,8 +7,8 @@ use bevy::ecs::{
 };
 #[cfg(any(target_os = "android", target_os = "ios"))]
 use bevy::input::{
-    keyboard::{Key, KeyboardInput},
     ButtonState,
+    keyboard::{Key, KeyboardInput},
 };
 
 #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -51,8 +51,8 @@ pub fn create_breakout_app(
         bevy_app.insert_non_send_resource(android_asset_manager);
 
         use bevy::render::{
-            settings::{RenderCreation, WgpuSettings},
             RenderPlugin,
+            settings::{RenderCreation, WgpuSettings},
         };
         default_plugins = default_plugins.set(RenderPlugin {
             render_creation: RenderCreation::Automatic(WgpuSettings {
@@ -75,7 +75,7 @@ pub fn create_breakout_app(
         // If a custom AssetPlugin plugin is not provided,  it will crash at runtime:
         // thread '<unnamed>' panicked at 'Bevy must be setup with the #[bevy_main] macro on Android'
         default_plugins = default_plugins
-            .add_before::<bevy::asset::AssetPlugin, _>(android_asset_io::AndroidAssetIoPlugin);
+            .add_before::<bevy::asset::AssetPlugin>(android_asset_io::AndroidAssetIoPlugin);
     }
     bevy_app
         .insert_resource(ClearColor(Color::srgb(0.8, 0.4, 0.6)))
@@ -108,7 +108,7 @@ pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState)
     let mut windows_system_state: SystemState<Query<(Entity, &mut Window)>> =
         SystemState::from_world(app.world_mut());
     let windows = windows_system_state.get_mut(app.world_mut());
-    if let Ok((entity, _)) = windows.get_single() {
+    if let Ok((entity, _)) = windows.single() {
         let input = KeyboardInput {
             logical_key: if key_code == KeyCode::ArrowLeft {
                 Key::ArrowLeft
@@ -118,6 +118,8 @@ pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState)
             state,
             key_code: key_code,
             window: entity,
+            repeat: false,
+            text: None,
         };
         app.world_mut().send_event(input);
     }
@@ -135,7 +137,7 @@ pub(crate) fn close_bevy_window(mut app: Box<App>) {
     for (window, _focus) in windows.iter() {
         commands.entity(window).despawn();
     }
-    app_exit_events.send(AppExit::Success);
+    app_exit_events.write(AppExit::Success);
     windows_state.apply(app.world_mut());
 
     app.update();
