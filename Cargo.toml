@@ -21,8 +21,8 @@ libc = "*"
 raw-window-handle = "0.6"
 wgpu = "24"
 bevy = { version = "0.16", default-features = true }
-bevy_platform = { version = "0.16.0" }
-bevy_tasks = { version = "0.16.0" }
+bevy_platform = { version = "0.16" }
+bevy_tasks = { version = "0.16" }
 uuid = { version = "1.13", features = ["v4"] }
 log = "0.4"
 
