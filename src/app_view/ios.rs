@@ -48,7 +48,7 @@ impl AppView {
 }
 
 impl HasWindowHandle for AppView {
-    fn window_handle(&self) -> Result<WindowHandle, HandleError> {
+    fn window_handle(&self) -> Result<WindowHandle<'_>, HandleError> {
         Ok(unsafe {
             WindowHandle::borrow_raw(RawWindowHandle::UiKit(UiKitWindowHandle::new({
                 let ui_view = self.view as _;
@@ -59,7 +59,7 @@ impl HasWindowHandle for AppView {
 }
 
 impl HasDisplayHandle for AppView {
-    fn display_handle(&self) -> Result<DisplayHandle, HandleError> {
+    fn display_handle(&self) -> Result<DisplayHandle<'_>, HandleError> {
         Ok(
             unsafe {
                 DisplayHandle::borrow_raw(RawDisplayHandle::UiKit(UiKitDisplayHandle::new()))

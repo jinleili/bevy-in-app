@@ -1,5 +1,4 @@
 use bevy::{app::MainScheduleOrder, ecs::schedule::*, prelude::*};
-use log::{debug, info};
 
 /// Independent [`Schedule`] for stepping systems.
 ///
@@ -105,7 +104,10 @@ fn build_ui(
     mut state: ResMut<State>,
 ) {
     let mut text_spans = Vec::new();
-    let mut always_run = Vec::new();
+    let mut always_run: Vec<(
+        bevy_ecs::intern::Interned<dyn ScheduleLabel + 'static>,
+        NodeId,
+    )> = Vec::new();
 
     let Ok(schedule_order) = stepping.schedules() else {
         return;
@@ -130,17 +132,19 @@ fn build_ui(
             return;
         };
 
-        for (node_id, system) in systems {
+        for (key, system) in systems {
             // skip bevy default systems; we don't want to step those
-            if system.name().starts_with("bevy") {
-                always_run.push((*label, node_id));
+            if system.name().as_string().starts_with("bevy") {
+                always_run.push((*label, NodeId::System(key)));
                 continue;
             }
 
             // Add an entry to our systems list so we can find where to draw
             // the cursor when the stepping cursor is at this system
             // we add plus 1 to account for the empty root span
-            state.systems.push((*label, node_id, text_spans.len() + 1));
+            state
+                .systems
+                .push((*label, NodeId::System(key), text_spans.len() + 1));
 
             // Add a text section for displaying the cursor for this system
             text_spans.push((
@@ -169,7 +173,7 @@ fn build_ui(
             position_type: PositionType::Absolute,
             top: state.ui_top,
             left: state.ui_left,
-            padding: UiRect::all(Val::Px(10.0)),
+            padding: UiRect::all(px(10)),
             ..default()
         },
         BackgroundColor(Color::srgba(1.0, 1.0, 1.0, 0.33)),
@@ -184,7 +188,7 @@ fn build_stepping_hint(mut commands: Commands) {
     } else {
         "Bevy was compiled without stepping support. Run with `--features=bevy_debug_stepping` to enable stepping."
     };
-    info!("{hint_text}");
+    info!("{}", hint_text);
     // stepping description box
     commands.spawn((
         Text::new(hint_text),
@@ -195,8 +199,8 @@ fn build_stepping_hint(mut commands: Commands) {
         TextColor(FONT_COLOR),
         Node {
             position_type: PositionType::Absolute,
-            bottom: Val::Px(5.0),
-            left: Val::Px(5.0),
+            bottom: px(5),
+            left: px(5),
             ..default()
         },
     ));
@@ -204,7 +208,7 @@ fn build_stepping_hint(mut commands: Commands) {
 
 fn handle_input(keyboard_input: Res<ButtonInput<KeyCode>>, mut stepping: ResMut<Stepping>) {
     if keyboard_input.just_pressed(KeyCode::Slash) {
-        info!("{stepping:#?}");
+        info!("{:#?}", stepping);
     }
     // grave key to toggle stepping mode for the FixedUpdate schedule
     if keyboard_input.just_pressed(KeyCode::Backquote) {
@@ -255,10 +259,9 @@ fn update_ui(
         return;
     }
 
-    let (cursor_schedule, cursor_system) = match stepping.cursor() {
-        // no cursor means stepping isn't enabled, so we're done here
-        None => return,
-        Some(c) => c,
+    // no cursor means stepping isn't enabled, so we're done here
+    let Some((cursor_schedule, cursor_system)) = stepping.cursor() else {
+        return;
     };
 
     for (schedule, system, text_index) in &state.systems {

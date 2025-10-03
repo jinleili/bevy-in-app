@@ -1,9 +1,9 @@
 use bevy::app::{App, Plugin};
 use bevy::ecs::{
     entity::Entity,
-    event::EventWriter,
+    lifecycle::RemovedComponents,
+    message::MessageWriter,
     prelude::*,
-    removal_detection::RemovedComponents,
     system::{Commands, NonSendMut, Query, SystemState},
 };
 use bevy::log::info;
@@ -79,7 +79,7 @@ pub fn create_bevy_window(app: &mut App) {
     let mut create_window_system_state: SystemState<(
         Commands,
         Query<(Entity, &mut Window), Added<Window>>,
-        EventWriter<WindowCreated>,
+        MessageWriter<WindowCreated>,
         NonSendMut<AppViews>,
     )> = SystemState::from_world(app.world_mut());
     let (mut commands, mut new_windows, mut created_window_writer, mut app_views) =
@@ -116,7 +116,7 @@ pub fn create_bevy_window(app: &mut App) {
 pub(crate) fn despawn_window(
     mut closed: RemovedComponents<Window>,
     window_entities: Query<&Window>,
-    mut close_events: EventWriter<WindowClosed>,
+    mut close_events: MessageWriter<WindowClosed>,
     mut app_views: NonSendMut<AppViews>,
 ) {
     for entity in closed.read() {

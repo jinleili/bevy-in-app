@@ -7,12 +7,10 @@ use std::f32::consts::PI;
 
 use bevy::pbr::wireframe::{WireframeConfig, WireframePlugin};
 use bevy::{
+    asset::RenderAssetUsages,
     color::palettes::basic::SILVER,
     prelude::*,
-    render::{
-        render_asset::RenderAssetUsages,
-        render_resource::{Extent3d, TextureDimension, TextureFormat},
-    },
+    render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
 
 pub struct ShapesDemoPlugin;

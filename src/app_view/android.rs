@@ -49,7 +49,7 @@ impl AppView {
 }
 
 impl HasWindowHandle for AppView {
-    fn window_handle(&self) -> Result<WindowHandle, HandleError> {
+    fn window_handle(&self) -> Result<WindowHandle<'_>, HandleError> {
         unsafe {
             let a_native_window = self.native_window.a_native_window.lock().unwrap();
             let handle = AndroidNdkWindowHandle::new(

@@ -63,7 +63,7 @@ fn touched(obj: *mut libc::c_void, phase: TouchPhase, position: Vec2) {
         id: 0,
     };
 
-    app.world_mut().send_event(touch);
+    app.world_mut().write_message(touch);
 }
 
 #[unsafe(no_mangle)]

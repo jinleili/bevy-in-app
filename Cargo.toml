@@ -1,9 +1,9 @@
 [package]
 name = "bevy-in-app"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["jinleili"]
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.88"
 
 [workspace.metadata.rustflags]
 # 禁用 unexpected_cfgs 检查，解决 objc crate 的警告
@@ -19,10 +19,12 @@ bevy_debug_stepping = ["bevy/bevy_debug_stepping"]
 [dependencies]
 libc = "*"
 raw-window-handle = "0.6"
-wgpu = "24"
-bevy = { version = "0.16", default-features = true }
-bevy_platform = { version = "0.16" }
-bevy_tasks = { version = "0.16" }
+wgpu = "26"
+bevy = { version = "0.17" }
+bevy_asset = { version = "0.17" }
+bevy_ecs = { version = "0.17" }
+bevy_platform = { version = "0.17" }
+bevy_tasks = { version = "0.17" }
 uuid = { version = "1.13", features = ["v4"] }
 log = "0.4"
 

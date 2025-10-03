@@ -121,7 +121,7 @@ pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState)
             repeat: false,
             text: None,
         };
-        app.world_mut().send_event(input);
+        app.world_mut().write_message(input);
     }
 }
 
@@ -131,7 +131,7 @@ pub(crate) fn close_bevy_window(mut app: Box<App>) {
     let mut windows_state: SystemState<(
         Commands,
         Query<(Entity, &mut Window)>,
-        EventWriter<AppExit>,
+        MessageWriter<AppExit>,
     )> = SystemState::from_world(app.world_mut());
     let (mut commands, windows, mut app_exit_events) = windows_state.get_mut(app.world_mut());
     for (window, _focus) in windows.iter() {

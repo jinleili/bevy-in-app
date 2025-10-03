@@ -61,6 +61,11 @@ class ViewController: UIViewController {
             displayLink.isPaused = true
             release_bevy_app(bevy)
         }
+        // NOTE: bevy 0.17 recreate app will cause panic:
+        // thread '<unnamed>' panicked at /Users/lijinlei/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/
+        // bevy_render-0.17.1/src/render_resource/bind_group_layout.rs:73:10:
+        // init_empty_bind_group_layout was called more than once: BindGroupLayout { id: BindGroupLayoutId(513), 
+        // value: WgpuWrapper(BindGroupLayout { inner: Core(CoreBindGroupLayout { context: ContextWgpuCore { type: "Native" }, id: Id(241,1) }) }) }
         
         createBevyApp()
         displayLink.isPaused = false

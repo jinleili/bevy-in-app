@@ -12,7 +12,7 @@ use log::LevelFilter;
 unsafe extern "C" {}
 
 #[unsafe(no_mangle)]
-pub fn android_main(_android_app: bevy::window::android_activity::AndroidApp) {
+pub fn android_main(_android_app: bevy::android::android_activity::AndroidApp) {
     // This maybe a bevy issue
     // `android_main` empty function is currently required, otherwise, a panic will occur:
     //
