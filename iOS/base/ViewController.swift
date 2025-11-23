@@ -12,16 +12,6 @@ class ViewController: UIViewController {
     @IBOutlet var metalV: MetalView!
     var bevyApp: OpaquePointer?
     
-    var rotationRate: CMRotationRate?
-    var gravity: CMAcceleration?
-    lazy var motionManager: CMMotionManager = {
-        let manager = CMMotionManager.init()
-        manager.gyroUpdateInterval = 0.032
-        manager.accelerometerUpdateInterval = 0.032
-        manager.deviceMotionUpdateInterval = 0.032
-        return manager
-    }()
-    
     lazy var displayLink: CADisplayLink = {
         CADisplayLink.init(target: self, selector: #selector(enterFrame))
     }()
@@ -30,6 +20,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
        
         self.displayLink.add(to: .current, forMode: .default)
+        self.displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: 120, maximum: 120, preferred: 120);
         self.displayLink.isPaused = true
     }
     
@@ -40,13 +31,11 @@ class ViewController: UIViewController {
             self.createBevyApp()
         }
         self.displayLink.isPaused = false
-        self.startDeviceMotionUpdates()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         displayLink.isPaused = true
-        self.stopDeviceMotionUpdates()
     }
     
     func createBevyApp() {
@@ -76,9 +65,6 @@ class ViewController: UIViewController {
             return
         }
         // call rust
-        if let gravity = gravity {
-            device_motion(bevy, Float(gravity.x), Float(gravity.y), Float(gravity.z))
-        }
         enter_frame(bevy)
     }
     

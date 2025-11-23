@@ -17,10 +17,37 @@ crate-type = ["rlib", "staticlib", "cdylib"]
 bevy_debug_stepping = ["bevy/bevy_debug_stepping"]
 
 [dependencies]
-libc = "*"
+libc = "0.2"
 raw-window-handle = "0.6"
 wgpu = "26"
-bevy = { version = "0.17" }
+# Even more slim bevvy 
+bevy = { version = "0.17", default-features = false, features = [
+  "std",
+  "async_executor",
+  "bevy_asset",
+  "bevy_color",
+  "bevy_core_pipeline",
+  "bevy_gizmos",
+  "bevy_image",
+  "bevy_light",
+  "bevy_log",
+  "bevy_mesh",
+  "bevy_camera",
+  "bevy_pbr",
+  "bevy_render",
+  "bevy_scene",
+  "bevy_state",
+#   "bevy_text",
+  "bevy_ui",
+  "bevy_ui_render",
+  "bevy_window",
+  "bevy_winit",
+  "default_font",
+  "tonemapping_luts",
+  "zstd_rust",
+  "png",
+] }
+# bevy = { version = "0.17" }
 bevy_asset = { version = "0.17" }
 bevy_ecs = { version = "0.17" }
 bevy_platform = { version = "0.17" }
@@ -29,7 +56,7 @@ uuid = { version = "1.13", features = ["v4"] }
 log = "0.4"
 
 [target.'cfg(target_os = "ios")'.dependencies]
-core-graphics = "*"
+core-graphics = "0.25"
 objc = "0.2"
 
 [target.'cfg(target_os = "android")'.dependencies]
@@ -38,8 +65,8 @@ jni = "0.21"
 jni_fn = "0.1"
 ndk-sys = "0.6.0+11769913"
 ndk = "0.9.0"
-ndk-context = "*"
-log-panics = "*"
+ndk-context = "0.1"
+log-panics = "2.1"
 
 [profile.dev]
 opt-level = 1 # 1 for minimal optimization and good debugging.

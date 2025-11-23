@@ -22,71 +22,31 @@ pub use ffi::*;
 #[cfg(target_os = "android")]
 mod android_asset_io;
 
-mod breakout_game;
-mod lighting_demo;
-mod shapes_demo;
-mod stepping;
+mod simple_demo;
 
+/// Creates and configures a Bevy app for cross-platform use (desktop, Android, iOS).
 #[allow(unused_variables)]
-pub fn create_breakout_app(
+pub fn create_app(
     #[cfg(target_os = "android")] android_asset_manager: android_asset_io::AndroidAssetManager,
 ) -> App {
-    #[allow(unused_imports)]
-    use bevy::winit::WinitPlugin;
-
-    let mut bevy_app = App::new();
-
-    #[allow(unused_mut)]
-    let mut default_plugins = DefaultPlugins.build();
-
-    #[cfg(any(target_os = "android", target_os = "ios"))]
-    {
-        default_plugins = default_plugins
-            .disable::<WinitPlugin>()
-            .set(WindowPlugin::default());
-    }
-
+    let mut app = App::new();
+    
+    // Insert Android asset manager resource if on Android
     #[cfg(target_os = "android")]
-    {
-        bevy_app.insert_non_send_resource(android_asset_manager);
+    app.insert_non_send_resource(android_asset_manager);
+    
+    // Configure plugins for the target platform
+    let plugins = configure_plugins();
+    
+    app.insert_resource(ClearColor(Color::srgb(0.1, 0.1, 0.1)))
+        .add_plugins(plugins);
 
-        use bevy::render::{
-            RenderPlugin,
-            settings::{RenderCreation, WgpuSettings},
-        };
-        default_plugins = default_plugins.set(RenderPlugin {
-            render_creation: RenderCreation::Automatic(WgpuSettings {
-                backends: Some(wgpu::Backends::VULKAN),
-                ..default()
-            }),
-            ..default()
-        });
-
-        // the custom asset io plugin must be inserted in-between the
-        // `CorePlugin' and `AssetPlugin`. It needs to be after the
-        // CorePlugin, so that the IO task pool has already been constructed.
-        // And it must be before the `AssetPlugin` so that the asset plugin
-        // doesn't create another instance of an asset server. In general,
-        // the AssetPlugin should still run so that other aspects of the
-        // asset system are initialized correctly.
-        //
-        // 2023/11/04, Bevy v0.12:
-        // In the Android, Bevy's AssetPlugin relies on winit, which we are not using.
-        // If a custom AssetPlugin plugin is not provided,  it will crash at runtime:
-        // thread '<unnamed>' panicked at 'Bevy must be setup with the #[bevy_main] macro on Android'
-        default_plugins = default_plugins
-            .add_before::<bevy::asset::AssetPlugin>(android_asset_io::AndroidAssetIoPlugin);
-    }
-    bevy_app
-        .insert_resource(ClearColor(Color::srgb(0.8, 0.4, 0.6)))
-        .add_plugins(default_plugins);
-
+    // Add platform-specific plugins
     #[cfg(any(target_os = "android", target_os = "ios"))]
-    bevy_app.add_plugins(app_view::AppViewPlugin);
+    app.add_plugins(app_view::AppViewPlugin);
 
-    bevy_app.add_plugins(breakout_game::BreakoutGamePlugin);
-    // bevy_app.add_plugins(lighting_demo::LightingDemoPlugin);
-    // bevy_app.add_plugins(shapes_demo::ShapesDemoPlugin);
+    // Add the demo plugin
+    app.add_plugins(simple_demo::SimpleDemoPlugin);
 
     // In this scenario, need to call the setup() of the plugins that have been registered
     // in the App manually.
@@ -95,13 +55,56 @@ pub fn create_breakout_app(
     #[cfg(any(target_os = "android", target_os = "ios"))]
     {
         use bevy::app::PluginsState;
-        if bevy_app.plugins_state() == PluginsState::Ready {}
-        bevy_app.finish();
-        bevy_app.cleanup();
+        if app.plugins_state() == PluginsState::Ready {}
+        app.finish();
+        app.cleanup();
     }
 
-    bevy_app
+    app
 }
+
+/// Configures Bevy plugins based on the target platform.
+#[allow(unused_mut)]
+fn configure_plugins() -> bevy::app::PluginGroupBuilder {
+    #[allow(unused_imports)]
+    use bevy::winit::WinitPlugin;
+
+    let mut plugins = DefaultPlugins.build();
+
+    // Disable winit on mobile platforms (we use native windowing)
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    {
+        plugins = plugins
+            .disable::<WinitPlugin>()
+            .set(WindowPlugin::default());
+    }
+
+    // Configure Android-specific settings
+    #[cfg(target_os = "android")]
+    {
+        use bevy::render::{
+            RenderPlugin,
+            settings::{RenderCreation, WgpuSettings},
+        };
+        
+        plugins = plugins.set(RenderPlugin {
+            render_creation: RenderCreation::Automatic(WgpuSettings {
+                backends: Some(wgpu::Backends::VULKAN),
+                ..default()
+            }),
+            ..default()
+        });
+
+        // The custom asset IO plugin must be inserted before AssetPlugin.
+        // This is required because Bevy's default AssetPlugin relies on winit,
+        // which we don't use on Android.
+        plugins = plugins
+            .add_before::<bevy::asset::AssetPlugin>(android_asset_io::AndroidAssetIoPlugin);
+    }
+
+    plugins
+}
+
 
 #[cfg(any(target_os = "android", target_os = "ios"))]
 pub(crate) fn change_input(app: &mut App, key_code: KeyCode, state: ButtonState) {

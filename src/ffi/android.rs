@@ -46,7 +46,7 @@ pub fn create_bevy_app(
         scale_factor: scale_factor as _,
     };
 
-    let mut bevy_app = crate::create_breakout_app(AndroidAssetManager(a_asset_manager));
+    let mut bevy_app = crate::create_app(AndroidAssetManager(a_asset_manager));
     bevy_app.insert_non_send_resource(android_obj);
     crate::app_view::create_bevy_window(&mut bevy_app);
     log::info!("Bevy App created!");
