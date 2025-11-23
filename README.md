@@ -15,15 +15,18 @@ This repository implements such a scenario and uses the phone's motion sensor to
 ![120hz Fixed](assets/github/profiles/120hz_fixed.png)
 
 
+
+## Build iOS
 ```sh
 # Add iOS target
 rustup target add aarch64-apple-ios
 
 # Build for iOS target
 sh ./ios_build.sh --release
-```
 
-Then, Open `iOS/bevy_in_iOS.xcodeproj` with Xcode，connect an iOS device and run.
+# Open the xCode project
+open ./iOS/bevy_in_iOS.xcodeproj
+```
 
 ## **Android**
 
