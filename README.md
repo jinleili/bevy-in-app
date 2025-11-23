@@ -6,12 +6,14 @@ If you want to add a mini-game to an existing app, or implement some dynamic UI 
 
 This repository implements such a scenario and uses the phone's motion sensor to play breakout mini-games.
 
-## Screenshot
+## Screenshots
 
 | ![Bevy in iOS App](assets/bevy_in_ios.png) | ![Bevy in Android App](assets/bevy_in_android.png) |
 | ------------------------------------------ | -------------------------------------------------- |
 
-## **iOS**
+## IOS Power Profiles 
+![120hz Fixed](assets/github/profiles/120hz_fixed.png)
+
 
 ```sh
 # Add iOS target
