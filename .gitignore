@@ -18,3 +18,4 @@ iOS/libs/debug/*
 iOS/libs/release/*
 iOS/libs/M1+Mac/*
 GPU-Frame-Caputre.xcodeproj
+xcuserdata/
