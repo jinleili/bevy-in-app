@@ -15,7 +15,7 @@ if [ "${TARGET}" = "--release" ]; then
     : ${RELEASE_MODE:=--release}
 fi
 
-cargo build --target ${TARGET} ${RELEASE_MODE}
+cargo build --features=bevy_debug_stepping --target ${TARGET} ${RELEASE_MODE}
 
 # Copy libbevy_in_app.a to iOS project
 # 

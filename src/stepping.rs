@@ -134,7 +134,7 @@ fn build_ui(
 
         for (key, system) in systems {
             // skip bevy default systems; we don't want to step those
-            if system.name().as_string().starts_with("bevy") {
+            if system.name().to_string().starts_with("bevy") {
                 always_run.push((*label, NodeId::System(key)));
                 continue;
             }

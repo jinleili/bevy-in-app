@@ -36,11 +36,11 @@ impl Plugin for AndroidAssetIoPlugin {
 
         // override bevy default asset reader
         // https://github.com/bevyengine/bevy/pull/9885
-        app.register_asset_source(
-            AssetSourceId::Default,
-            AssetSource::build()
-                .with_reader(|| Box::new(AndroidAssetIo::new("assets".to_string()))),
-        );
+        // app.register_asset_source(
+        //     AssetSourceId::Default,
+        //     AssetSource::build()
+        //         .with_reader(|| Box::new(AndroidAssetIo::new("assets".to_string()))),
+        // );
     }
 }
 

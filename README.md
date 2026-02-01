@@ -63,6 +63,7 @@ sh ./android_build.sh --release
 
 | Bevy version  | `bevy-in-app` version |
 | :------------ | :-------------------- |
+| `0.18`        | `0.6`                 |
 | `0.17`        | `0.5`                 |
 | `0.16`        | `0.4`                 |
 | `0.14 dev`    | `0.3`                 |
